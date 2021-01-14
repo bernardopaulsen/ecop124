@@ -1,0 +1,13 @@
+\section{Introdução}
+
+    O objetivo do presente trabalho é analisar uma série temporal univariada utilizando os métodos apresentados na cadeira ECOP124 (Estatística Econômica Aplicada) ministrada pelos professores Carlos Schonerwald e Fernando Sabino. O trabalho será baseado nos tópicos:
+    
+    \begin{itemize}
+        \item Pontos de Mudança e Quebras Estruturais;
+        \item Modelos ARMA Univariados;
+        \item Mais Testes e Previsões;
+        \item Não Estacionariedade, Testes de Raiz Unitária e Modelos ARIMA(p,d,q);
+        \item Modelos de Volatilidade Univariada.
+    \end{itemize}
+    
+    Como material de apoio para o desenvolvimento do trabalho encontram-se disponíveis notas de aula e vídeo-aulas. Este trabalho é referente à dupla 1, à qual coube a subsérie temporal 4 (observações 5775 à 6564).

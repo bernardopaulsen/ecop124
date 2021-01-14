@@ -1,0 +1,35 @@
+\section{Preparatórios}
+
+    Primeriamente, precisamos importar as bibliotecas que serão necessárias para executar os códigos das próximas seções. Utilizamos as seguintes bibliotecas:
+    
+    \begin{itemize}
+        \item \textit{astsa} (\cite{astsa}): função \textit{sarima}.
+        \item \textit{forecast} (\cite{forecast}): funções \textit{auto.arima} e \textit{forecast};
+        \item \textit{lubridate} (\cite{lubridate}): função \textit{parse\underline{ }date\underline{ }time};
+        \item \textit{quantmod} (\cite{quantmod}): função \textit{xts};
+        \item \textit{rugarch} (\cite{rugarch}): funções \textit{ugarchfit}, \textit{ugarchforecast} e \textit{ugarchspec};
+        \item \textit{stats} (\cite{stats}): funções \textit{acf} e \textit{Box.test};
+        \item \textit{strucchange} (\cite{strucchange}): funções \textit{breakpoints}, \textit{confint}, \textit{efp} e \textit{sctest};
+        \item \textit{tseries} (\cite{tseries}): função \textit{pacf};
+        \item \textit{urca} (\cite{urca}): função \textit{ur.df}.
+        \item \textit{uroot} (\cite{uroot}): função \textit{ch.test}.
+    \end{itemize}
+    
+<<libraries, message=FALSE>>=
+library('astsa')
+library('forecast')
+library('lubridate')
+library('quantmod')
+library('rugarch')
+library('stats')
+library('strucchange')
+library('tseries')
+library('urca')
+library('uroot')
+@
+
+    Antes de importar os dados é necessário selecionar como diretório de trabalho a pasta que contém o arquivo com os dados.
+
+<<setwd>>=
+setwd("~/Google Drive/Mestrado/Estat/Prova2/3")
+@

@@ -1,0 +1,58 @@
+\section{Dados}
+
+\subsection{Importação dos Dados}
+
+No \textit{chunk} a sequir importamos os dados e selecionamos a amostra correspondente ao nosso grupo.
+
+<<import>>=
+file_name    <- 'dataset.Rds'
+sample_begin <- 5775
+sample_end   <- 6564
+dataset      <- readRDS(file_name)[sample_begin:sample_end,]
+@
+  
+  Agora, podemos analisar brevementos dados importados (sumário e primeiros valores).
+
+<<raw_summary, warning=FALSE>>=
+summary(dataset)
+head(dataset)
+@
+  
+   Como podemos verificar acima, a função \textit{summary} nos mostra que os elementos da coluna \textit{TIME} são do tipo character, e a função \textit{head} que o formato das datas é ``YYYY-MM''. Essas informações serão úteis na próxima subseção, quando formos tratar os dados.
+
+\subsection{Tramemento dos Dados}
+
+Para o uso dos dados nas próximas seções é necessário transformar os dados da coluna \textit{TIME} do formato \textit{character} para o formato \textit{datetime} (para isso usamos as informações coletadas na subseção anterior). Além disso, é necessário transormar a estrutura de dados de `tabela' para `série temporal'. Isso é feito no \textit{chunk} a seguir.
+
+<<datetime>>=
+dataset$TIME <- parse_date_time(dataset$TIME,
+                                orders = 'ym')
+dataset      <- xts(dataset$Value,
+                    order.by = dataset$TIME)
+colnames(dataset) <- 'Value'
+@
+
+        Mais uma vez, analisamos os dados.
+        
+<<datetime_summary, warning=FALSE>>=
+summary(dataset)
+head(dataset)
+@
+
+        Agora, vimos que o formato das datas é \textit{datetime}, e as datas passaram de uma coluna de dados para índice dos valores da série temporal.
+
+\subsection{Descrição dos Dados}
+
+        Como último passo na importação dos dados, os descrevemos. A média e os valores mínimos e máximos estão na subseção acima, então agora mostramos apenas o gráfico da série temporal (Figura \ref{fig:ts_value}). Maiores descrições dos dados serão apresentadas no tempo devido.
+
+        \begin{figure}[H]
+        \caption{Série Temporal}
+        \label{fig:ts_value}
+        \centering
+<<fig=T, fig.with=6, fig.height=4>>=
+plot(dataset$Value,
+     type = 'l',
+     xlab = 'Tempo',
+     ylab = 'Valor')
+@
+        \end{figure}

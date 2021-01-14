@@ -1,0 +1,23 @@
+    \subsection{Identificação das Possíveis Formas Funcionais}
+    
+        \begin{figure}[H]
+        \caption{FAC da Primeira Diferença}
+        \centering
+<<fig=T, fig.with=6, fig.height=4>>=
+acf(as.matrix(na.omit(data1$Diff)), lag.max=40)
+@
+        \end{figure}
+        
+        A função de autocorrelação tem até o segundo lag significativo, enquanto mostra um lag significativo no fator sazonal.
+        
+        \begin{figure}[H]
+        \caption{FACP da Primeira Diferença}
+        \centering
+<<fig=T, fig.with=6, fig.height=4>>=
+pacf(as.matrix(na.omit(data1$Diff)), lag.max=40)
+@
+        \end{figure}
+
+        A função de autocorrelação parcial tem até o terceiro lag significativo, enquanto mostra dois lags significativos no fator sazonal.
+        
+        A análise das funções acima sugere que uma ordem máxima para o modelo SARIMA é (2,1,3)(1,0,2)12.

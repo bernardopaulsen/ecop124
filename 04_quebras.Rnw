@@ -1,0 +1,39 @@
+\section{Quebras Estruturais}
+
+    \subsection{PFE}
+    
+<<>>=
+efp1 <- efp(dataset~1, type="OLS-CUSUM")
+@
+
+        \begin{figure}[H]
+        \caption{Processo de Flutuação Empírica}
+        \centering
+<<fig=T, fig.with=6, fig.height=4>>=
+plot(efp1)
+@
+        \end{figure}
+
+    \subsection{Teste}
+    
+<<>>=
+sctest(dataset~1, type="OLS-CUSUM")
+@
+    
+    \subsection{Data}
+    
+<<>>=
+point <- which.min(efp1$process)
+@
+
+    \subsection{Divisão da Série Temporal}
+    
+<<>>=
+data1 <- dataset[1:point-1]
+data2 <- dataset[point:length(dataset)]
+@
+
+<<>>=
+summary(data1)
+summary(data2)
+@
