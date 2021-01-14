@@ -1,0 +1,678 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.1 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated as
+% required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+\datalist[entry]{anyt/global//global/global}
+  \entry{desctools}{manual}{}
+    \name{author}{1}{}{%
+      {{hash=AS}{%
+         family={{Andri et mult. al.}},
+         familyi={A\bibinitperiod},
+         given={Signorell},
+         giveni={S\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{AS1}
+    \strng{fullhash}{AS1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{{And}20}
+    \field{labelyear}{2020}
+    \field{labeldatesource}{}
+    \field{sortinit}{A}
+    \field{sortinithash}{A}
+    \field{note}{R package version 0.99.39}
+    \field{title}{{DescTools}: Tools for Descriptive Statistics}
+    \verb{url}
+    \verb https://cran.r-project.org/package=DescTools
+    \endverb
+    \field{year}{2020}
+  \endentry
+
+  \entry{nortstest}{manual}{}
+    \name{author}{2}{}{%
+      {{hash=AA}{%
+         family={{Alonzo Matamoros}},
+         familyi={A\bibinitperiod},
+         given={Asael},
+         giveni={A\bibinitperiod},
+      }}%
+      {{hash=NRA}{%
+         family={Nieto-Reyes},
+         familyi={N\bibinithyphendelim R\bibinitperiod},
+         given={Alicia},
+         giveni={A\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{AANRA1}
+    \strng{fullhash}{AANRA1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{ANR20}
+    \field{labelyear}{2020}
+    \field{labeldatesource}{}
+    \field{sortinit}{A}
+    \field{sortinithash}{A}
+    \field{note}{R package version 1.0.0}
+    \field{title}{nortsTest: Assessing Normality of Stationary Process}
+    \verb{url}
+    \verb https://CRAN.R-project.org/package=nortsTest
+    \endverb
+    \field{year}{2020}
+  \endentry
+
+  \entry{boxjenkins}{book}{}
+    \name{author}{4}{}{%
+      {{hash=BG}{%
+         family={Box},
+         familyi={B\bibinitperiod},
+         given={G.E.P.},
+         giveni={G\bibinitperiod},
+      }}%
+      {{hash=JG}{%
+         family={Jenkins},
+         familyi={J\bibinitperiod},
+         given={G.M.},
+         giveni={G\bibinitperiod},
+      }}%
+      {{hash=RG}{%
+         family={Reinsel},
+         familyi={R\bibinitperiod},
+         given={G.C.},
+         giveni={G\bibinitperiod},
+      }}%
+      {{hash=LG}{%
+         family={Ljung},
+         familyi={L\bibinitperiod},
+         given={G.M.},
+         giveni={G\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {Wiley}%
+    }
+    \strng{namehash}{BG+1}
+    \strng{fullhash}{BGJGRGLG1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{Box+15}
+    \field{labelyear}{2015}
+    \field{labeldatesource}{}
+    \field{sortinit}{B}
+    \field{sortinithash}{B}
+    \field{isbn}{9781118674925}
+    \field{series}{Wiley Series in Probability and Statistics}
+    \field{title}{Time Series Analysis: Forecasting and Control}
+    \verb{url}
+    \verb https://books.google.com.br/books?id=rNt5CgAAQBAJ
+    \endverb
+    \field{year}{2015}
+  \endentry
+
+  \entry{ch}{article}{}
+    \name{author}{2}{}{%
+      {{hash=CF}{%
+         family={Canova},
+         familyi={C\bibinitperiod},
+         given={Fabio},
+         giveni={F\bibinitperiod},
+      }}%
+      {{hash=HBE}{%
+         family={Hansen},
+         familyi={H\bibinitperiod},
+         given={Bruce\bibnamedelima E.},
+         giveni={B\bibinitperiod\bibinitdelim E\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {Taylor & Francis}%
+    }
+    \strng{namehash}{CFHBE1}
+    \strng{fullhash}{CFHBE1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{CH95}
+    \field{labelyear}{1995}
+    \field{labeldatesource}{}
+    \field{sortinit}{C}
+    \field{sortinithash}{C}
+    \verb{doi}
+    \verb 10.1080/07350015.1995.10524598
+    \endverb
+    \verb{eprint}
+    \verb https://www.tandfonline.com/doi/pdf/10.1080/07350015.1995.10524598
+    \endverb
+    \field{number}{3}
+    \field{pages}{237\bibrangedash 252}
+    \field{title}{Are Seasonal Patterns Constant Over Time? A Test for Seasonal
+  Stability}
+    \verb{url}
+    \verb https://www.tandfonline.com/doi/abs/10.1080/07350015.1995.10524598
+    \endverb
+    \field{volume}{13}
+    \field{journaltitle}{Journal of Business \& Economic Statistics}
+    \field{year}{1995}
+  \endentry
+
+  \entry{chungliu}{article}{}
+    \name{author}{2}{}{%
+      {{hash=CC}{%
+         family={Chen},
+         familyi={C\bibinitperiod},
+         given={Chung},
+         giveni={C\bibinitperiod},
+      }}%
+      {{hash=LLM}{%
+         family={Liu},
+         familyi={L\bibinitperiod},
+         given={Lon-Mu},
+         giveni={L\bibinithyphendelim M\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{CCLLM1}
+    \strng{fullhash}{CCLLM1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{CL93}
+    \field{labelyear}{1993}
+    \field{labeldatesource}{}
+    \field{sortinit}{C}
+    \field{sortinithash}{C}
+    \verb{doi}
+    \verb 10.2307/2290724
+    \endverb
+    \field{title}{Joint Estimation of Model Parameters and Outlier Effects in
+  Time Series}
+    \field{volume}{88}
+    \field{journaltitle}{JASA. Journal of the American Statistical Association}
+    \field{month}{03}
+    \field{year}{1993}
+  \endentry
+
+  \entry{adf}{article}{}
+    \name{author}{2}{}{%
+      {{hash=DDA}{%
+         family={Dickey},
+         familyi={D\bibinitperiod},
+         given={David\bibnamedelima A.},
+         giveni={D\bibinitperiod\bibinitdelim A\bibinitperiod},
+      }}%
+      {{hash=FWA}{%
+         family={Fuller},
+         familyi={F\bibinitperiod},
+         given={Wayne\bibnamedelima A.},
+         giveni={W\bibinitperiod\bibinitdelim A\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {[American Statistical Association, Taylor & Francis, Ltd.]}%
+    }
+    \strng{namehash}{DDAFWA1}
+    \strng{fullhash}{DDAFWA1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{DF79}
+    \field{labelyear}{1979}
+    \field{labeldatesource}{}
+    \field{sortinit}{D}
+    \field{sortinithash}{D}
+    \field{abstract}{%
+    Let n observations Y<sub>1</sub>, Y<sub>2</sub>, ..., Y<sub>n</sub> be
+  generated by the model Y<sub>t</sub> = ρ Y<sub>t - 1</sub> + e<sub>t</sub>,
+  where Y<sub>0</sub> is a fixed constant and {e<sub>t</sub>}<sub>t =
+  1</sub><sup>n</sup> is a sequence of independent normal random variables with
+  mean 0 and variance σ<sup>2</sup>. Properties of the regression estimator of
+  ρ are obtained under the assumption that ρ = ± 1. Representations for the
+  limit distributions of the estimator of ρ and of the regression t test are
+  derived. The estimator of ρ and the regression t test furnish methods of
+  testing the hypothesis that ρ = 1.%
+    }
+    \field{issn}{01621459}
+    \field{number}{366}
+    \field{pages}{427\bibrangedash 431}
+    \field{title}{Distribution of the Estimators for Autoregressive Time Series
+  With a Unit Root}
+    \verb{url}
+    \verb http://www.jstor.org/stable/2286348
+    \endverb
+    \field{volume}{74}
+    \field{journaltitle}{Journal of the American Statistical Association}
+    \field{year}{1979}
+  \endentry
+
+  \entry{rugarch}{manual}{}
+    \name{author}{1}{}{%
+      {{hash=GA}{%
+         family={Ghalanos},
+         familyi={G\bibinitperiod},
+         given={Alexios},
+         giveni={A\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{GA1}
+    \strng{fullhash}{GA1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{Gha20}
+    \field{labelyear}{2020}
+    \field{labeldatesource}{}
+    \field{sortinit}{G}
+    \field{sortinithash}{G}
+    \field{note}{R package version 1.4-4.}
+    \field{title}{rugarch: Univariate GARCH models.}
+    \field{year}{2020}
+  \endentry
+
+  \entry{lubridate}{article}{}
+    \name{author}{2}{}{%
+      {{hash=GG}{%
+         family={Grolemund},
+         familyi={G\bibinitperiod},
+         given={Garrett},
+         giveni={G\bibinitperiod},
+      }}%
+      {{hash=WH}{%
+         family={Wickham},
+         familyi={W\bibinitperiod},
+         given={Hadley},
+         giveni={H\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{GGWH1}
+    \strng{fullhash}{GGWH1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{GW11}
+    \field{labelyear}{2011}
+    \field{labeldatesource}{}
+    \field{sortinit}{G}
+    \field{sortinithash}{G}
+    \field{number}{3}
+    \field{pages}{1\bibrangedash 25}
+    \field{title}{Dates and Times Made Easy with {lubridate}}
+    \verb{url}
+    \verb https://www.jstatsoft.org/v40/i03/
+    \endverb
+    \field{volume}{40}
+    \field{journaltitle}{Journal of Statistical Software}
+    \field{year}{2011}
+  \endentry
+
+  \entry{forecast}{article}{}
+    \name{author}{2}{}{%
+      {{hash=HRJ}{%
+         family={Hyndman},
+         familyi={H\bibinitperiod},
+         given={Rob\bibnamedelima J},
+         giveni={R\bibinitperiod\bibinitdelim J\bibinitperiod},
+      }}%
+      {{hash=KY}{%
+         family={Khandakar},
+         familyi={K\bibinitperiod},
+         given={Yeasmin},
+         giveni={Y\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{HRJKY1}
+    \strng{fullhash}{HRJKY1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{HK08}
+    \field{labelyear}{2008}
+    \field{labeldatesource}{}
+    \field{sortinit}{H}
+    \field{sortinithash}{H}
+    \field{number}{3}
+    \field{pages}{1\bibrangedash 22}
+    \field{title}{Automatic time series forecasting: the forecast package for
+  {R}}
+    \verb{url}
+    \verb https://www.jstatsoft.org/article/view/v027i03
+    \endverb
+    \field{volume}{26}
+    \field{journaltitle}{Journal of Statistical Software}
+    \field{year}{2008}
+  \endentry
+
+  \entry{tsoutliers}{manual}{}
+    \name{author}{1}{}{%
+      {{hash=dLJL}{%
+         prefix={de},
+         prefixi={d\bibinitperiod},
+         family={Lacalle},
+         familyi={L\bibinitperiod},
+         given={Javier\bibnamedelima López},
+         giveni={J\bibinitperiod\bibinitdelim L\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{LJLd1}
+    \strng{fullhash}{LJLd1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{Lac19}
+    \field{labelyear}{2019}
+    \field{labeldatesource}{}
+    \field{sortinit}{L}
+    \field{sortinithash}{L}
+    \field{note}{R package version 0.6-8}
+    \field{title}{tsoutliers: Detection of Outliers in Time Series}
+    \verb{url}
+    \verb https://CRAN.R-project.org/package=tsoutliers
+    \endverb
+    \field{year}{2019}
+  \endentry
+
+  \entry{uroot}{manual}{}
+    \name{author}{1}{}{%
+      {{hash=dLJL}{%
+         prefix={de},
+         prefixi={d\bibinitperiod},
+         family={Lacalle},
+         familyi={L\bibinitperiod},
+         given={Javier\bibnamedelima López},
+         giveni={J\bibinitperiod\bibinitdelim L\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{LJLd1}
+    \strng{fullhash}{LJLd1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{Lac20}
+    \field{labelyear}{2020}
+    \field{labeldatesource}{}
+    \field{sortinit}{L}
+    \field{sortinithash}{L}
+    \field{note}{R package version 2.1-2}
+    \field{title}{uroot: Unit Root Tests for Seasonal Time Series}
+    \verb{url}
+    \verb https://CRAN.R-project.org/package=uroot
+    \endverb
+    \field{year}{2020}
+  \endentry
+
+  \entry{ljungbox}{article}{}
+    \name{author}{2}{}{%
+      {{hash=LGM}{%
+         family={Ljung},
+         familyi={L\bibinitperiod},
+         given={G.\bibnamedelima M.},
+         giveni={G\bibinitperiod\bibinitdelim M\bibinitperiod},
+      }}%
+      {{hash=BGEP}{%
+         family={Box},
+         familyi={B\bibinitperiod},
+         given={G.\bibnamedelima E.\bibnamedelima P.},
+         giveni={G\bibinitperiod\bibinitdelim E\bibinitperiod\bibinitdelim
+  P\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {[Oxford University Press, Biometrika Trust]}%
+    }
+    \strng{namehash}{LGMBGEP1}
+    \strng{fullhash}{LGMBGEP1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{LB78}
+    \field{labelyear}{1978}
+    \field{labeldatesource}{}
+    \field{sortinit}{L}
+    \field{sortinithash}{L}
+    \field{abstract}{%
+    The overall test for lack of fit in autoregressive-moving average models
+  proposed by Box & Pierce (1970) is considered. It is shown that a
+  substantially improved approximation results from a simple modification of
+  this test. Some consideration is given to the power of such tests and their
+  robustness when the innovations are nonnormal. Similar modifications in the
+  overall tests used for transfer function-noise models are proposed.%
+    }
+    \field{issn}{00063444}
+    \field{number}{2}
+    \field{pages}{297\bibrangedash 303}
+    \field{title}{On a Measure of Lack of Fit in Time Series Models}
+    \verb{url}
+    \verb http://www.jstor.org/stable/2335207
+    \endverb
+    \field{volume}{65}
+    \field{journaltitle}{Biometrika}
+    \field{year}{1978}
+  \endentry
+
+  \entry{urca}{book}{}
+    \name{author}{1}{}{%
+      {{hash=PB}{%
+         family={Pfaff},
+         familyi={P\bibinitperiod},
+         given={B.},
+         giveni={B\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {Springer}%
+    }
+    \strng{namehash}{PB1}
+    \strng{fullhash}{PB1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{Pfa08}
+    \field{labelyear}{2008}
+    \field{labeldatesource}{}
+    \field{sortinit}{P}
+    \field{sortinithash}{P}
+    \field{edition}{Second}
+    \field{note}{ISBN 0-387-27960-1}
+    \field{title}{Analysis of Integrated and Cointegrated Time Series with R}
+    \verb{url}
+    \verb http://www.pfaffikus.de
+    \endverb
+    \list{location}{1}{%
+      {New York}%
+    }
+    \field{year}{2008}
+  \endentry
+
+  \entry{stats}{manual}{}
+    \name{author}{1}{}{%
+      {{hash=R}{%
+         family={{R Core Team}},
+         familyi={R\bibinitperiod},
+      }}%
+    }
+    \list{organization}{1}{%
+      {R Foundation for Statistical Computing}%
+    }
+    \strng{namehash}{R1}
+    \strng{fullhash}{R1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{{R C}20}
+    \field{labelyear}{2020}
+    \field{labeldatesource}{}
+    \field{sortinit}{R}
+    \field{sortinithash}{R}
+    \field{title}{R: A Language and Environment for Statistical Computing}
+    \verb{url}
+    \verb https://www.R-project.org/
+    \endverb
+    \list{location}{1}{%
+      {Vienna, Austria}%
+    }
+    \field{year}{2020}
+  \endentry
+
+  \entry{quantmod}{manual}{}
+    \name{author}{2}{}{%
+      {{hash=RJA}{%
+         family={Ryan},
+         familyi={R\bibinitperiod},
+         given={Jeffrey\bibnamedelima A.},
+         giveni={J\bibinitperiod\bibinitdelim A\bibinitperiod},
+      }}%
+      {{hash=UJM}{%
+         family={Ulrich},
+         familyi={U\bibinitperiod},
+         given={Joshua\bibnamedelima M.},
+         giveni={J\bibinitperiod\bibinitdelim M\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{RJAUJM1}
+    \strng{fullhash}{RJAUJM1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{RU20}
+    \field{labelyear}{2020}
+    \field{labeldatesource}{}
+    \field{sortinit}{R}
+    \field{sortinithash}{R}
+    \field{note}{R package version 0.4.18}
+    \field{title}{quantmod: Quantitative Financial Modelling Framework}
+    \verb{url}
+    \verb https://CRAN.R-project.org/package=quantmod
+    \endverb
+    \field{year}{2020}
+  \endentry
+
+  \entry{astsa}{manual}{}
+    \name{author}{1}{}{%
+      {{hash=SD}{%
+         family={Stoffer},
+         familyi={S\bibinitperiod},
+         given={David},
+         giveni={D\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{SD1}
+    \strng{fullhash}{SD1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{Sto20}
+    \field{labelyear}{2020}
+    \field{labeldatesource}{}
+    \field{sortinit}{S}
+    \field{sortinithash}{S}
+    \field{note}{R package version 1.12}
+    \field{title}{astsa: Applied Statistical Time Series Analysis}
+    \verb{url}
+    \verb https://CRAN.R-project.org/package=astsa
+    \endverb
+    \field{year}{2020}
+  \endentry
+
+  \entry{shapirowilk}{article}{}
+    \name{author}{2}{}{%
+      {{hash=SSS}{%
+         family={SHAPIRO},
+         familyi={S\bibinitperiod},
+         given={S.\bibnamedelima S.},
+         giveni={S\bibinitperiod\bibinitdelim S\bibinitperiod},
+      }}%
+      {{hash=WMB}{%
+         family={WILK},
+         familyi={W\bibinitperiod},
+         given={M.\bibnamedelima B.},
+         giveni={M\bibinitperiod\bibinitdelim B\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{SSSWMB1}
+    \strng{fullhash}{SSSWMB1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{SW65}
+    \field{labelyear}{1965}
+    \field{labeldatesource}{}
+    \field{sortinit}{S}
+    \field{sortinithash}{S}
+    \verb{doi}
+    \verb 10.1093/biomet/52.3-4.591
+    \endverb
+    \verb{eprint}
+    \verb https://academic.oup.com/biomet/article-pdf/52/3-4/591/962907/52-3-4-
+    \verb 591.pdf
+    \endverb
+    \field{issn}{0006-3444}
+    \field{number}{3-4}
+    \field{pages}{591\bibrangedash 611}
+    \field{title}{{An analysis of variance test for normality (complete
+  samples)†}}
+    \verb{url}
+    \verb https://doi.org/10.1093/biomet/52.3-4.591
+    \endverb
+    \field{volume}{52}
+    \field{journaltitle}{Biometrika}
+    \field{month}{12}
+    \field{year}{1965}
+  \endentry
+
+  \entry{tseries}{manual}{}
+    \name{author}{2}{}{%
+      {{hash=TA}{%
+         family={Trapletti},
+         familyi={T\bibinitperiod},
+         given={Adrian},
+         giveni={A\bibinitperiod},
+      }}%
+      {{hash=HK}{%
+         family={Hornik},
+         familyi={H\bibinitperiod},
+         given={Kurt},
+         giveni={K\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{TAHK1}
+    \strng{fullhash}{TAHK1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{TH20}
+    \field{labelyear}{2020}
+    \field{labeldatesource}{}
+    \field{sortinit}{T}
+    \field{sortinithash}{T}
+    \field{note}{R package version 0.10-48.}
+    \field{title}{tseries: Time Series Analysis and Computational Finance}
+    \verb{url}
+    \verb https://CRAN.R-project.org/package=tseries
+    \endverb
+    \field{year}{2020}
+  \endentry
+
+  \entry{strucchange}{article}{}
+    \name{author}{1}{}{%
+      {{hash=ZA}{%
+         family={Zeileis},
+         familyi={Z\bibinitperiod},
+         given={Achim},
+         giveni={A\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{ZA1}
+    \strng{fullhash}{ZA1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelalpha}{Zei06}
+    \field{labelyear}{2006}
+    \field{labeldatesource}{}
+    \field{sortinit}{Z}
+    \field{sortinithash}{Z}
+    \field{pages}{2987\bibrangedash 3008}
+    \field{title}{Implementing a Class of Structural Change Tests: An
+  Econometric Computing Approach}
+    \field{volume}{50}
+    \field{journaltitle}{Computational Statistics \& Data Analysis}
+    \field{year}{2006}
+  \endentry
+\enddatalist
+\endinput

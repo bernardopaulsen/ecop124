@@ -26,6 +26,14 @@ acf(as.matrix(data1), lag.max=40)
 @
             \end{figure}
             
+            \begin{figure}[H]
+            \caption{FACP da Série Temporal}
+            \centering
+<<fig=T, fig.with=6, fig.height=4>>=
+pacf(as.matrix(data1), lag.max=40)
+@
+            \end{figure}
+            
             A função de autocorrelação aparentemente possui decaimento linear, indicando possibilidade de raiz unitária. Para testar a hipótese de presença de raiz unitária com o teste Dickey-Fuller aumentado (\cite{adf}). O teste será realizado com \textit{drift}, pois a visualização do gráfico da série temporal indica a presença de tal. Para escolher o lag do teste, começaremos pelo lag 1 e, caso os resíduos do teste forem ruído branco, aceitamos o lag. Caso os resíduos não apresentarem comportamento de ruído branco, repetimos os passos com o lag imediatamente maior. No \textit{chunk} abaixo realizamos testes ADF para 24 lags, e para cada teste testamos os resíduos com testes de Ljung-Box (\cite{ljungbox}) até 25 lags.
 
 <<>>=
@@ -86,10 +94,29 @@ for (i in 19:24){
 @
             \end{figure}
             
-            Nos gráficos acima podemos ver que a única ordem de lags que gera resíduos que são ruído branco é a ordem 24, então realizamos o teste com essa ordem e visualizamos o sumário do teste.
+            Nos gráficos acima podemos ver que a única ordem de lags que gera resíduos que são ruído branco é a ordem 24, então realizamos o teste com essa ordem.
             
 <<>>=
 adf <- ur.df(data1$Value, type='drift', lags=24)
+@
+
+            \begin{figure}[H]
+            \caption{Resíduos}
+            \centering
+<<fig=T>>=
+par(mfrow = c(2,2))
+plot(adf@res, type='l', main='Residuals')
+plot(results[,24], main='Ljung-Box')
+acf(as.matrix(adf@res), lag.max=40)
+pacf(as.matrix(adf@res), lag.max=40)
+@
+            \end{figure}
+
+            Tanto o gráfico dos resíduos quanto os gráficos das funções de autocorrelação e autocorrelação parcial indicam que os resíduos do teste se comportam como ruído branco. Os p-valores do teste de Ljung-Box não rejeitam a hipótese de independência dos resíduos.
+
+            Agora, visualizamos o sumário do teste.        
+            
+<<>>=
 summary(adf)
 @
 
@@ -128,6 +155,14 @@ plot(data1$Diff)
             \centering
 <<fig=T, fig.with=6, fig.height=4>>=
 acf(as.matrix(na.omit(data1$Diff)), lag.max=40)
+@
+            \end{figure}
+            
+            \begin{figure}[H]
+            \caption{FACP da Primeira Diferença}
+            \centering
+<<fig=T, fig.with=6, fig.height=4>>=
+pacf(as.matrix(na.omit(data1$Diff)), lag.max=40)
 @
             \end{figure}
             
@@ -196,11 +231,30 @@ for (i in 19:24){
 @
             \end{figure}
 
-            Nos gráficos acima podemos ver que a primeira ordem de lags que gera resíduos que são ruído branco é a ordem 23, então realizamos o teste com essa ordem e visualizamos o sumário do teste.
+            Nos gráficos acima podemos ver que a primeira ordem de lags que gera resíduos que são ruído branco é a ordem 23, então realizamos o teste com essa ordem e apresentamos os gráficos dos resíduos e dos testes nos resíduos.
             
 <<>>=
 adf <- ur.df(na.omit(data1$Diff), lags=23)
-summary(adf)
 @
 
+            \begin{figure}[H]
+            \caption{Resíduos}
+            \centering
+<<fig=T>>=
+par(mfrow = c(2,2))
+plot(adf@res, type='l', main='Residuals')
+plot(results[,23], main='Ljung-Box')
+acf(as.matrix(adf@res), lag.max=40)
+pacf(as.matrix(adf@res), lag.max=40)
+@
+            \end{figure}
+
+            Tanto o gráfico dos resíduos quanto os gráficos das funções de autocorrelação e autocorrelação parcial indicam que os resíduos do teste se comportam como ruído branco. Os p-valores do teste de Ljung-Box não rejeitam a hipótese de independência dos resíduos.
+
+            Agora, visualizamos o sumário do teste.
+
+<<>>=
+summary(adf)
+@
+            
             O valor da estatística do teste é de -5,1105. Os valores críticos para o teste são de -2,58 (1\%), -1,95 (5\%) e -1,62 (10\%). Sendo assim, o valor do teste ultrapassou os valores críticos para todos os graus de significância. O teste então rejeita a hipótese nula de presença de raiz unitária. O resultado obtido é, então, que a série temporal original é integrada de ordem um - I(1).

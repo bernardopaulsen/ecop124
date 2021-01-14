@@ -49,15 +49,34 @@ for (i in models){
 }
 @
 
+        Abaixo, os critérios de informação de cada modelo.
+
 <<>>=
 models
 aics
+@
+
+        Escolhemos, então, o modelo com menor critério de informação.
+
+<<>>=
+ind <- which.min(aics)
+mod <- models[ind]
+ps[mod]
+qs[mod]
+Ps[mod]
+Qs[mod]
 @
 
         O modelo com melhor critério de informação é o segundo, que corresponde ao 4 na lista dos 72 modelos, que é o SARIMA (1,1,2)(0,0,2)12. Estimamos então novamente esse modelo.
             
 <<sarima_estimation6, results="hide", fig.show="hide", warning=FALSE>>=
 model2 <- sarima(data2$Value,
-                1, 1, 2,
-                0, 0, 2, 12)
+                1, 1, 3,
+                1, 0, 3, 12)
+@
+
+        Abaixo, o sumário do modelo.
+        
+<<>>=
+print(model2)
 @

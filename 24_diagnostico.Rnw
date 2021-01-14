@@ -7,16 +7,18 @@
 plot(model2$fit$residuals)
 @
         \end{figure}
+        
+        \subsubsection{Independência}
             
-        \begin{figure}[H]
-        \caption{FAC dos Resíduos}
-        \centering          
+            \begin{figure}[H]
+            \caption{FAC dos Resíduos}
+            \centering          
 <<fig=T, fig.with=6, fig.height=4>>=
 acf(as.matrix(model2$fit$residuals), lag.max=40)
 @
-        \end{figure}
+            \end{figure}
             
-        Tanto o gráfico dos resíduos quanto a sua função de autocorrelação indicam que os resíduos se comportam como ruído branco. Para testar essa hipótese, realizamos o teste de Ljung-Box para todos os lags até o vinte e cinco. Os testes são realizados no \textit{chunk} abaixo, e na figura abaixo estão os p-valores dos testes para cada lag.
+            Tanto o gráfico dos resíduos quanto a sua função de autocorrelação indicam que os resíduos se comportam como ruído branco. Para testar essa hipótese, realizamos o teste de Ljung-Box para todos os lags até o vinte e cinco. Os testes são realizados no \textit{chunk} abaixo, e na figura abaixo estão os p-valores dos testes para cada lag.
             
 <<>>=
 boxs <- matrix(nrow=25,ncol=1)
@@ -26,10 +28,70 @@ for (i in 1:25){
 }
 @
 
-        \begin{figure}[H]
-        \caption{P-Valores de Ljung-Box}
-        \centering          
+            \begin{figure}[H]
+            \caption{P-Valores de Ljung-Box}
+            \centering          
 <<fig=T, fig.with=6, fig.height=4>>=
 plot(boxs, type='l')
 @
-        \end{figure}
+            \end{figure}
+            
+            Os p-valores não rejeitam a hipótese nula de independência da distribuição.
+            
+        \subsubsection{Homoscedasticidade}
+        
+            Testamos a homoscedasticidade dos resíduos apicando a análise acima no resíduo ao quadrado.
+            
+            \begin{figure}[H]
+            \caption{Resíduos ao Quadrado}
+            \centering
+<<fig=T, fig.with=6, fig.height=4>>=
+plot(model2$fit$residuals^2)
+@
+            \end{figure}
+            
+            \begin{figure}[H]
+            \caption{FAC dos Resíduos ao Quadrado}
+            \centering          
+<<fig=T, fig.with=6, fig.height=4>>=
+acf(as.matrix(model2$fit$residuals)^2, lag.max=40)
+@
+            \end{figure}
+            
+            \begin{figure}[H]
+            \caption{FACP dos Resíduos ao Quadrado}
+            \centering          
+<<fig=T, fig.with=6, fig.height=4>>=
+pacf(as.matrix(model2$fit$residuals)^2, lag.max=40)
+@
+            \end{figure}
+            
+            Tanto o gráfico dos resíduos ao quadrado quanto a sua função de autocorrelação e sua função de autocorrelação parcial indicam homoscedasticidade. Para testar essa hipótese, realizamos o teste de Ljung-Box nos rsíduos ao quadrado para todos os lags até o vinte e cinco. Os testes são realizados no \textit{chunk} abaixo, e na figura abaixo estão os p-valores dos testes para cada lag.
+            
+<<>>=
+boxs <- matrix(nrow=25,ncol=1)
+for (i in 1:25){
+    box <- Box.test(model2$fit$residuals^2,lag=i)
+    boxs[i] <- box$p.value
+}
+@
+
+            \begin{figure}[H]
+            \caption{P-Valores de Ljung-Box}
+            \centering          
+<<fig=T, fig.with=6, fig.height=4>>=
+plot(boxs, type='l')
+@
+            \end{figure}
+            
+            Os p-valores não rejeitam a hipótese nula de independência da distribuição. Os resíduos podem ser considerados então homoscedásticos, pois os resíduos ao quadrado são `bem comportados' (ruído branco). Não é necessário então estimar um modelo de variância condicional.
+            
+        \subsubsection{Normalidade}
+        
+            Para testar a normalidade dos resíduos aplicamos o teste de Shapiro-Wilk (\cite{shapirowilk}).
+            
+<<>>=
+shapiro.test(model2$fit$residuals)
+@
+
+            O teste não rejeita a hipótese nula de normalidade dos resíduos.

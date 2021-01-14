@@ -1,0 +1,28 @@
+\section{Outliers}
+
+    Antes de estimar os modelos, detectamos e removemos outliers. No teste abaixo, cinco tipos de outliers são considerados: outliers aditivos, mudanças de nível, mudanças temporárias, outliers inovadores e mudanças de nível sazonal. O teste segue a metodolodia de \cite{chungliu}.
+
+<<>>=
+ol <- tso(ts(dataset))
+ol
+@
+  
+    Considerando o resultado do teste do \textit{chunk} anterior, substituimos o valor outlier com a função \textit{tsclean}.
+
+<<warning=FALSE>>=
+dataset <- tsclean(dataset)
+@
+  
+    No próximo \textit{chunk} apresentamos o sumário dos novos dados, junto ao gráfico dos novos dados.
+  
+<<>>=
+summary(dataset)
+@
+
+    \begin{figure}[H]
+    \caption{Série Temporal sem Outliers}
+    \centering
+<<fig=T, fig.with=6, fig.height=4>>=
+plot(dataset)
+@
+    \end{figure}

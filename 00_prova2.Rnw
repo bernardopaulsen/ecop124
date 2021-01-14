@@ -25,7 +25,10 @@
 <<child='03_dados.Rnw'>>=
 @
 
-<<child='04_quebras.Rnw'>>=
+<<child='04_outliers.Rnw'>>=
+@
+
+<<child='05_quebras.Rnw'>>=
 @
 
 
@@ -41,6 +44,9 @@
 <<child='14_diagnostico.Rnw'>>=
 @
 
+<<child='15_previsao.Rnw'>>=
+@
+
 
 <<child='21_integracao.Rnw'>>=
 @
@@ -54,6 +60,12 @@
 <<child='24_diagnostico.Rnw'>>=
 @
 
+<<child='25_previsao.Rnw'>>=
+@
+
+
+<<child='06_conclusao.Rnw'>>=
+@
 
 \printbibliography[heading=bibintoc]
 

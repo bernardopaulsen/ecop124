@@ -4,26 +4,32 @@
     
     \begin{itemize}
         \item \textit{astsa} (\cite{astsa}): função \textit{sarima}.
+        \item \textit(DescTools) (\cite{desctools}): função \textit{TheilU};
         \item \textit{forecast} (\cite{forecast}): funções \textit{auto.arima} e \textit{forecast};
         \item \textit{lubridate} (\cite{lubridate}): função \textit{parse\underline{ }date\underline{ }time};
+        \item \textit{notsTest} (\cite{nortstest}): função \textit{Lm.test};
         \item \textit{quantmod} (\cite{quantmod}): função \textit{xts};
         \item \textit{rugarch} (\cite{rugarch}): funções \textit{ugarchfit}, \textit{ugarchforecast} e \textit{ugarchspec};
         \item \textit{stats} (\cite{stats}): funções \textit{acf} e \textit{Box.test};
-        \item \textit{strucchange} (\cite{strucchange}): funções \textit{breakpoints}, \textit{confint}, \textit{efp} e \textit{sctest};
+        \item \textit{strucchange} (\cite{strucchange}): funções \textit{efp} e \textit{sctest};
         \item \textit{tseries} (\cite{tseries}): função \textit{pacf};
-        \item \textit{urca} (\cite{urca}): função \textit{ur.df}.
+        \item \textit{tsoutliers} (\cite{tsoutliers}): funções \textit{tso} e \textit{tsclean};
+        \item \textit{urca} (\cite{urca}): função \textit{ur.df};
         \item \textit{uroot} (\cite{uroot}): função \textit{ch.test}.
     \end{itemize}
     
 <<libraries, message=FALSE>>=
 library('astsa')
+library('DescTools')
 library('forecast')
 library('lubridate')
+library('nortsTest')
 library('quantmod')
 library('rugarch')
 library('stats')
 library('strucchange')
 library('tseries')
+library('tsoutliers')
 library('urca')
 library('uroot')
 @

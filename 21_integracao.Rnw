@@ -1,4 +1,4 @@
-\section{Primeira Série Temporal}
+\section{Segunda Série Temporal}
 
     \subsection{Definição da Ordem de Integração}
     
@@ -23,6 +23,14 @@ plot(data2)
             \centering
 <<fig=T, fig.with=6, fig.height=4>>=
 acf(as.matrix(data2), lag.max=40)
+@
+            \end{figure}
+            
+            \begin{figure}[H]
+            \caption{FACP da Série Temporal}
+            \centering
+<<fig=T, fig.with=6, fig.height=4>>=
+pacf(as.matrix(data2), lag.max=40)
 @
             \end{figure}
             
@@ -86,10 +94,28 @@ for (i in 19:24){
 @
             \end{figure}
             
-            Nos gráficos acima podemos ver que a única ordem de lags que gera resíduos que são ruído branco é a ordem 17, então realizamos o teste com essa ordem e visualizamos o sumário do teste.
+            Nos gráficos acima podemos ver que a única ordem de lags que gera resíduos que são ruído branco é a ordem 17, então realizamos o teste com essa ordem e apresentamos os gráficos dos resíduos e dos testes nos resíduos.
             
 <<>>=
-adf <- ur.df(data2$Value, type='drift', lags=17)
+adf <- ur.df(na.omit(data1$Diff), lags=17)
+@
+
+            \begin{figure}[H]
+            \caption{Resíduos}
+            \centering
+<<fig=T>>=
+par(mfrow = c(2,2))
+plot(adf@res, type='l', main='Residuals')
+plot(results[,17], main='Ljung-Box')
+acf(as.matrix(adf@res), lag.max=40)
+pacf(as.matrix(adf@res), lag.max=40)
+@
+            \end{figure}
+
+            Tanto o gráfico dos resíduos quanto os gráficos das funções de autocorrelação e autocorrelação parcial indicam que os resíduos do teste se comportam como ruído branco. Os p-valores do teste de Ljung-Box não rejeitam a hipótese de independência dos resíduos.
+            Agora, apresentamos o sumário do teste.
+            
+<<>>=
 summary(adf)
 @
 
@@ -128,6 +154,14 @@ plot(data2$Diff)
             \centering
 <<fig=T, fig.with=6, fig.height=4>>=
 acf(as.matrix(na.omit(data2$Diff)), lag.max=40)
+@
+            \end{figure}
+            
+            \begin{figure}[H]
+            \caption{FACP da Primeira Diferença}
+            \centering
+<<fig=T, fig.with=6, fig.height=4>>=
+pacf(as.matrix(na.omit(data2$Diff)), lag.max=40)
 @
             \end{figure}
             
@@ -196,10 +230,28 @@ for (i in 19:24){
 @
             \end{figure}
 
-            Nos gráficos acima podemos ver que a primeira ordem de lags que gera resíduos que são ruído branco é a ordem 23, então realizamos o teste com essa ordem e visualizamos o sumário do teste.
+            Nos gráficos acima podemos ver que a primeira ordem de lags que gera resíduos que são ruído branco é a ordem 23, então realizamos o teste com essa ordem e apresentamos os gráficos dos resíduos e dos testes nos resíduos.
             
 <<>>=
-adf <- ur.df(na.omit(data2$Diff), lags=23)
+adf <- ur.df(na.omit(data1$Diff), lags=23)
+@
+
+            \begin{figure}[H]
+            \caption{Resíduos}
+            \centering
+<<fig=T>>=
+par(mfrow = c(2,2))
+plot(adf@res, type='l', main='Residuals')
+plot(results[,23], main='Ljung-Box')
+acf(as.matrix(adf@res), lag.max=40)
+pacf(as.matrix(adf@res), lag.max=40)
+@
+            \end{figure}
+
+            Tanto o gráfico dos resíduos quanto os gráficos das funções de autocorrelação e autocorrelação parcial indicam que os resíduos do teste se comportam como ruído branco. Os p-valores do teste de Ljung-Box não rejeitam a hipótese de independência dos resíduos.
+            Agora, apresentamos o sumário do teste.
+            
+<<>>=
 summary(adf)
 @
 

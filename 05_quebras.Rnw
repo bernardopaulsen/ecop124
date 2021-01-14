@@ -1,0 +1,55 @@
+\section{Quebras Estruturais}
+
+    Nesta seção testamos a existência de quebra estrutural na série. No caso de existência de quebra estrutural, estimamos a data de quebra.
+
+    \subsection{Processo de Flutuação Empírica}
+    
+        Priemeiramente, calculamos o processo de flutuação empírica e o apresentamos no gráfico abaixo.
+    
+<<>>=
+efp1 <- efp(dataset~1, type="OLS-CUSUM")
+@
+
+        \begin{figure}[H]
+        \caption{Processo de Flutuação Empírica}
+        \centering
+<<fig=T, fig.with=6, fig.height=4>>=
+plot(efp1)
+@
+        \end{figure}
+        
+        O gráfico mostra que o processo ultrapassa os pontos críticos do intervalo de confiança, indicando que existe quebra estrutural na série temporal.
+
+    \subsection{Teste de Existência de Quebra Estrutural}
+    
+        Na subseção anterior verificamos que o processo de flutuação empírica ultrapassa os limites do intervalo de confiança. Agora, testamos a hipótese de quebra estrutural.
+    
+<<>>=
+sctest(dataset~1, type="OLS-CUSUM")
+@
+
+        O teste rejeita a hipótese nula de não existência de quebra estrutural, portanto podemos considerar que existe quebra estrutural na série temporal.
+    
+    \subsection{Estimação da Data da Quebra Estrutural}
+    
+        A estimativa de data mais provavél de quebra estrutural é o ponto do processo de flutuação empírica que mais se distancia dos pontos máximos do intervalo de confiança. Então, verificamos qual é esse valor.
+    
+<<>>=
+point <- which.min(efp1$process)
+@
+
+    \subsection{Divisão da Série Temporal}
+    
+        Na subseção anterior estimamos o ponto mais provável de quebra estrutural. Agora, separamos a série temporal original nesse ponto, como objetivo de obter uma série temporal para cada processo gerador.
+    
+<<>>=
+data1 <- dataset[1:point-1]
+data2 <- dataset[point:length(dataset)]
+@
+    
+        Abaixo apresentamos os sumários das duas novas séries temporais.
+
+<<>>=
+summary(data1)
+summary(data2)
+@
