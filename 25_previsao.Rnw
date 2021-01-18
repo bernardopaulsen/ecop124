@@ -4,18 +4,10 @@
     
         \subsubsection{Previsão}
         
-            Agora, realizaremos previsões para os últimos 20 períodos da amostra. Faremos previsão recursiva, ou seja: prevemos sempre apenas o período imediatamente subsequente, utilizando todos os dados até então.
+            Agora, realizaremos previsões para os últimos 10 períodos da amostra. Faremos previsão recursiva, ou seja: prevemos sempre apenas o período imediatamente subsequente, utilizando todos os dados até então.
         
 <<pred2, results="hide", fig.show="hide", warning=FALSE>>=
-fs <- c()
-for (i in 20:1){
-    until      <- length(data2$Value)-i
-    data       <- data2$Value[1:until]
-    prediction <- sarima.for(data, 1,
-                           1, 1, 3,
-                           1, 0, 3, 12)
-    fs <- append(fs, prediction$pred)
-}
+fs <- prediction(data2$Value,1,2,0,2)
 @
 
           Abaixo, as previsões realizadas.
@@ -31,7 +23,7 @@ fs
             \centering
 <<fig=T>>=
 length <- length(data2$Value)
-start  <- length - 19
+start  <- length - 9
 series <- data2$Value[start:length]
 par(mfrow = c(2,1))
 plot(fs,type='l', main='Previsões')
@@ -53,7 +45,7 @@ accuracy(fs,as.matrix(series))
 TheilU(series,fs)
 @
             
-            O índice do teste foi de 0,04403311, menor que 1. O modelo fez previsões melhores que uma simples adivinhação.
+            O índice do teste foi de 0,308, menor que 1. O modelo fez previsões melhores que uma simples adivinhação.
             
             
             

@@ -5,82 +5,88 @@
 \defcounter {refsection}{0}\relax 
 \contentsline {section}{\numberline {2}Preparatórios}{2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {3}Dados}{4}%
+\contentsline {subsection}{\numberline {2.1}Importação de Bibliotecas}{2}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.1}Importação dos Dados}{4}%
+\contentsline {subsection}{\numberline {2.2}Definição de Funções}{3}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.2}Tramemento dos Dados}{4}%
+\contentsline {subsection}{\numberline {2.3}Definição do Diretório de Trabalho}{6}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {3.3}Descrição dos Dados}{5}%
+\contentsline {section}{\numberline {3}Dados}{6}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {4}Outliers}{6}%
+\contentsline {subsection}{\numberline {3.1}Importação dos Dados}{6}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {5}Quebras Estruturais}{8}%
+\contentsline {subsection}{\numberline {3.2}Tramemento dos Dados}{7}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {5.1}Processo de Flutuação Empírica}{8}%
+\contentsline {subsection}{\numberline {3.3}Descrição dos Dados}{8}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {5.2}Teste de Existência de Quebra Estrutural}{8}%
+\contentsline {section}{\numberline {4}Outliers}{9}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {5.3}Estimação da Data da Quebra Estrutural}{9}%
+\contentsline {section}{\numberline {5}Quebras Estruturais}{11}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {5.4}Divisão da Série Temporal}{9}%
+\contentsline {subsection}{\numberline {5.1}Processo de Flutuação Empírica}{11}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {6}Primeira Série Temporal}{10}%
+\contentsline {subsection}{\numberline {5.2}Teste de Existência de Quebra Estrutural}{11}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {6.1}Definição da Ordem de Integração}{10}%
+\contentsline {subsection}{\numberline {5.3}Estimação da Data da Quebra Estrutural}{12}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {6.1.1}Análise da Série Original}{10}%
+\contentsline {subsection}{\numberline {5.4}Divisão da Série Temporal}{12}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {6.1.2}Diferenciação}{19}%
+\contentsline {section}{\numberline {6}Primeira Parte da Série Temporal}{13}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {6.1.3}Análise da Primeira Diferença}{19}%
+\contentsline {subsection}{\numberline {6.1}Definição da Ordem de Integração}{13}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {6.2}Identificação das Possíveis Formas Funcionais}{29}%
+\contentsline {subsubsection}{\numberline {6.1.1}Análise da Série Original}{13}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {6.3}Estimação}{30}%
+\contentsline {subsubsection}{\numberline {6.1.2}Diferenciação}{17}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {6.4}Diagnóstico dos Resíduos}{33}%
+\contentsline {subsubsection}{\numberline {6.1.3}Análise da Primeira Diferença}{17}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {6.4.1}Independência}{33}%
+\contentsline {subsubsection}{\numberline {6.1.4}Diferença Sazonal}{22}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {6.4.2}Homoscedasticidade}{36}%
+\contentsline {subsection}{\numberline {6.2}Identificação das Possíveis Formas Funcionais}{23}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {6.4.3}Normalidade}{39}%
+\contentsline {subsection}{\numberline {6.3}Estimação}{24}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {6.5}Previsão e Acurácia}{39}%
+\contentsline {subsection}{\numberline {6.4}Diagnóstico dos Resíduos}{25}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {6.5.1}Previsão}{40}%
+\contentsline {subsubsection}{\numberline {6.4.1}Independência}{25}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {6.5.2}Acurácia}{41}%
+\contentsline {subsubsection}{\numberline {6.4.2}Homoscedasticidade}{28}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {7}Segunda Série Temporal}{42}%
+\contentsline {subsection}{\numberline {6.5}Previsão e Acurácia}{31}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {7.1}Definição da Ordem de Integração}{42}%
+\contentsline {subsubsection}{\numberline {6.5.1}Previsão}{31}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {7.1.1}Análise da Série Original}{42}%
+\contentsline {subsubsection}{\numberline {6.5.2}Acurácia}{33}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {7.1.2}Diferenciação}{52}%
+\contentsline {section}{\numberline {7}Segunda Parte da Série Temporal}{34}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {7.1.3}Análise da Primeira Diferença}{52}%
+\contentsline {subsection}{\numberline {7.1}Definição da Ordem de Integração}{34}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {7.2}Identificação das Possíveis Formas Funcionais}{62}%
+\contentsline {subsubsection}{\numberline {7.1.1}Análise da Série Original}{34}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {7.3}Estimação}{63}%
+\contentsline {subsubsection}{\numberline {7.1.2}Diferenciação}{39}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {7.4}Diagnóstico dos Resíduos}{67}%
+\contentsline {subsubsection}{\numberline {7.1.3}Análise da Primeira Diferença}{39}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {7.4.1}Independência}{68}%
+\contentsline {subsubsection}{\numberline {7.1.4}Diferença Sazonal}{44}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {7.4.2}Homoscedasticidade}{69}%
+\contentsline {subsection}{\numberline {7.2}Identificação das Possíveis Formas Funcionais}{45}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {7.4.3}Normalidade}{72}%
+\contentsline {subsection}{\numberline {7.3}Estimação}{46}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsection}{\numberline {7.5}Previsão e Acurácia}{72}%
+\contentsline {subsection}{\numberline {7.4}Diagnóstico dos Resíduos}{47}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {7.5.1}Previsão}{73}%
+\contentsline {subsubsection}{\numberline {7.4.1}Independência}{47}%
 \defcounter {refsection}{0}\relax 
-\contentsline {subsubsection}{\numberline {7.5.2}Acurácia}{74}%
+\contentsline {subsubsection}{\numberline {7.4.2}Homoscedasticidade}{50}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{\numberline {8}Conclusão}{75}%
+\contentsline {subsection}{\numberline {7.5}Previsão e Acurácia}{53}%
 \defcounter {refsection}{0}\relax 
-\contentsline {section}{Refer\^encias}{75}%
+\contentsline {subsubsection}{\numberline {7.5.1}Previsão}{53}%
+\defcounter {refsection}{0}\relax 
+\contentsline {subsubsection}{\numberline {7.5.2}Acurácia}{55}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{\numberline {8}Conclusão}{56}%
+\defcounter {refsection}{0}\relax 
+\contentsline {section}{Refer\^encias}{56}%

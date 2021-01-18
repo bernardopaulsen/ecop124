@@ -1,4 +1,4 @@
-\section{Segunda Série Temporal}
+\section{Segunda Parte da Série Temporal}
 
     \subsection{Definição da Ordem de Integração}
     
@@ -16,13 +16,13 @@ plot(data2)
 @
             \end{figure}
             
-            A visualização da série temporal indica presença de raiz unitária. Para coletar mais indícios visuais analisamos abaixo a função de autocorrelação.
+            O gráfico assemelha-se a um passeio aleatório, portanto, indicandio a presença de raíz unitária. Para coletar mais indícios visuais analisamos abaixo a função de autocorrelação e a fução de autocorrelação parcial.
             
             \begin{figure}[H]
             \caption{FAC da Série Temporal}
             \centering
 <<fig=T, fig.with=6, fig.height=4>>=
-acf(as.matrix(data2), lag.max=40)
+acf(as.matrix(data2), lag.max=60)
 @
             \end{figure}
             
@@ -30,74 +30,21 @@ acf(as.matrix(data2), lag.max=40)
             \caption{FACP da Série Temporal}
             \centering
 <<fig=T, fig.with=6, fig.height=4>>=
-pacf(as.matrix(data2), lag.max=40)
+pacf(as.matrix(data2), lag.max=60)
 @
             \end{figure}
             
-            A função de autocorrelação aparentemente possui decaimento linear, indicando possibilidade de raiz unitária. Para testar a hipótese de presença de raiz unitária com o teste Dickey-Fuller aumentado (\cite{adf}). O teste será realizado com \textit{drift}, pois a visualização do gráfico da série temporal indica a presença de tal. Para escolher o lag do teste, começaremos pelo lag 1 e, caso os resíduos do teste forem ruído branco, aceitamos o lag. Caso os resíduos não apresentarem comportamento de ruído branco, repetimos os passos com o lag imediatamente maior. No \textit{chunk} abaixo realizamos testes ADF para 24 lags, e para cada teste testamos os resíduos com testes de Ljung-Box (\cite{ljungbox}) até 25 lags.
+            A função de autocorrelação aparentemente possui decaimento lento, indicando possibilidade de raiz unitária. Para testar a hipótese de presença de raiz unitária com o teste Dickey-Fuller aumentado (\cite{adf}). O teste será realizado sem \textit{drift} ou tendência, pois a visualização do gráfico da série temporal não indica a presença de tais. Para escolher o lag do teste, começaremos pelo lag 1 e, caso os resíduos do teste forem ruído branco, aceitamos o lag. Caso os resíduos não apresentarem comportamento de ruído branco, repetimos os passos com o lag imediatamente maior. No \textit{chunk} abaixo realizamos testes ADF para 24 lags, e para cada teste testamos os resíduos com testes de Ljung-Box (\cite{ljungbox}) até 25 lags.
 
 <<>>=
-results <- matrix(,nrow=25,ncol=24)
-for (i in 1:24){
-  adf <- ur.df(data2$Value, type='drift', lags=i)
-  for (e in 1:25){
-    box <- Box.test(adf@res,lag=e)
-    results[e,i] <- box$p.value
-  }
-}
+lag <- select_adf(data2$Value, "none")
+lag
 @
 
+            Escolhemos a ordem de lag 14.
 
-            Nas figuras abaixo encontram-se os resultados dos testes de Ljung-Box para os resíduos de cada um dos testes de Dickey-Fuller aumentados.
-
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 1 a 6}
-            \centering
-<<fig=T>>=
-par(mfrow = c(3,2))
-for (i in 1:6){
-  plot(results[,i], main=i)
-}
-@
-            \end{figure}
-            
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 7 a 12}
-            \centering
-<<fig=T>>=
-par(mfrow = c(3,2))
-for (i in 7:12){
-  plot(results[,i], main=i)
-}
-@
-            \end{figure}
-            
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 13 a 18}
-            \centering
-<<fig=T>>=
-par(mfrow = c(3,2))
-for (i in 13:18){
-  plot(results[,i], main=i)
-}
-@
-            \end{figure}
-
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 19 a 24}
-            \centering
-<<fig=T>>=
-par(mfrow = c(3,2))
-for (i in 19:24){
-  plot(results[,i], main=i)
-}
-@
-            \end{figure}
-            
-            Nos gráficos acima podemos ver que a única ordem de lags que gera resíduos que são ruído branco é a ordem 17, então realizamos o teste com essa ordem e apresentamos os gráficos dos resíduos e dos testes nos resíduos.
-            
 <<>>=
-adf <- ur.df(na.omit(data1$Diff), lags=17)
+adf <- ur.df(na.omit(data2$Value), "none", lags=lag)
 @
 
             \begin{figure}[H]
@@ -106,20 +53,22 @@ adf <- ur.df(na.omit(data1$Diff), lags=17)
 <<fig=T>>=
 par(mfrow = c(2,2))
 plot(adf@res, type='l', main='Residuals')
-plot(results[,17], main='Ljung-Box')
-acf(as.matrix(adf@res), lag.max=40)
-pacf(as.matrix(adf@res), lag.max=40)
+plot(all_box(adf@res), main='Ljung-Box')
+acf(as.matrix(adf@res), lag.max=60)
+pacf(as.matrix(adf@res), lag.max=60)
 @
             \end{figure}
 
             Tanto o gráfico dos resíduos quanto os gráficos das funções de autocorrelação e autocorrelação parcial indicam que os resíduos do teste se comportam como ruído branco. Os p-valores do teste de Ljung-Box não rejeitam a hipótese de independência dos resíduos.
-            Agora, apresentamos o sumário do teste.
+            
+            Agora, visualizamos as estatísticas do teste e os valores críticos        
             
 <<>>=
-summary(adf)
+adf@teststat
+adf@cval
 @
 
-            O valor da estatística do teste é de -2,2007. Os valores críticos para o teste são de -3,44 (1\%), -2,87 (5\%) e -2,57 (10\%). Sendo assim, o valor do teste não ultrapassou os valores críticos para nenhum grau de significância. O teste então aceita a hipótese nula de presença de raiz unitária.
+            O valor da estatística do teste é de -0.2343. Os valores críticos para o teste são de -2,58 (1\%), -1,95 (5\%) e -1,62 (10\%). Sendo assim, o valor do teste não ultrapassou os valores críticos para nenhum grau de significância. O teste então aceita a hipótese nula de presença de raiz unitária.
 
         \subsubsection{Diferenciação}
         
@@ -147,13 +96,13 @@ plot(data2$Diff)
 @
             \end{figure}
             
-            A visualização da série temporal não indica presença de raiz unitária. Para coletar mais indícios visuais analisamos abaixo a função de autocorrelação.
+            A analise visual do gráfico sugere variação em torno de uma média sem distanciamento grande por longos períodos, portanto, indica que a estacionariedade da série foi obtida na primeira diferenciação.
             
             \begin{figure}[H]
             \caption{FAC da Primeira Diferença}
             \centering
 <<fig=T, fig.with=6, fig.height=4>>=
-acf(as.matrix(na.omit(data2$Diff)), lag.max=40)
+acf(as.matrix(na.omit(data2$Diff)), lag.max=60)
 @
             \end{figure}
             
@@ -161,79 +110,21 @@ acf(as.matrix(na.omit(data2$Diff)), lag.max=40)
             \caption{FACP da Primeira Diferença}
             \centering
 <<fig=T, fig.with=6, fig.height=4>>=
-pacf(as.matrix(na.omit(data2$Diff)), lag.max=40)
+pacf(as.matrix(na.omit(data2$Diff)), lag.max=60)
 @
             \end{figure}
             
-            A função de autocorrelação indica padrão sazonal, então pode ser que seja necessário diferenciar sazonalmente a série diferenciada para transforma-la em estacionária. Testamos a seguir a hipótese nula de não presença de raiz unitária sazonal com o teste de Canova e Hansen (\cite{ch}).
-          
-<<warning=FALSE>>=
-ch = ch.test(ts(na.omit(data2$Diff), frequency=12), type="dummy", sid=c(1:12))
-print(ch)
-@
-
-            O teste retornou um p-valor de 0.6317, o que significa que não podemos rejeitar a hipótese nula de não presença de raiz unitária sazonal.
-            Agora que sabemos que não existe raiz unitária sazonal, testaremos, com o teste de Dickey-Fuller aumentado, a presença de raiz unitária não sazonal. Desta vez não adicionamos \textit{drift} ao modelo, pois a visualização dos dados não sujere presença de \textit{drift}. Seguiremos os passos descritos acima, quando aplicamos o teste na série temporal original.
-
-<<>>=
-results <- matrix(,nrow=25,ncol=24)
-for (i in 1:24){
-  adf <- ur.df(na.omit(data2$Diff), type='drift', lags=i)
-  for (e in 1:25){
-    box <- Box.test(adf@res,lag=e)
-    results[e,i] <- box$p.value
-  }
-}
-@
-
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 1 a 6}
-            \centering
-<<fig=T>>=
-par(mfrow = c(3,2))
-for (i in 1:6){
-  plot(results[,i], main=i)
-}
-@
-            \end{figure}
-            
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 7 a 12}
-            \centering
-<<fig=T>>=
-par(mfrow = c(3,2))
-for (i in 7:12){
-  plot(results[,i], main=i)
-}
-@
-            \end{figure}
-            
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 13 a 18}
-            \centering
-<<fig=T>>=
-par(mfrow = c(3,2))
-for (i in 13:18){
-  plot(results[,i], main=i)
-}
-@
-            \end{figure}
-
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 19 a 24}
-            \centering
-<<fig=T>>=
-par(mfrow = c(3,2))
-for (i in 19:24){
-  plot(results[,i], main=i)
-}
-@
-            \end{figure}
-
-            Nos gráficos acima podemos ver que a primeira ordem de lags que gera resíduos que são ruído branco é a ordem 23, então realizamos o teste com essa ordem e apresentamos os gráficos dos resíduos e dos testes nos resíduos.
+            A análise dos gráficos pós diferenciação indica rápido decaimento nas funções ACF e PACF, reforçando a hipótese de que não há raíz unitária. Agora testaremos, com o teste de Dickey-Fuller aumentado, a presença de raiz unitária. Não adicionaremos drift ou tendância no teste pois não há indício pelo gráfico da série de existência de algum desses parâmetros. Seguiremos os passos descritos acima, quando aplicamos o teste na série temporal original.
             
 <<>>=
-adf <- ur.df(na.omit(data1$Diff), lags=23)
+lag <- select_adf(na.omit(data2$Diff),"none")
+lag
+@
+
+            Escolhemos a ordem de lag 13.
+
+<<>>=
+adf <- ur.df(na.omit(data2$Diff), lags=lag)
 @
 
             \begin{figure}[H]
@@ -242,17 +133,31 @@ adf <- ur.df(na.omit(data1$Diff), lags=23)
 <<fig=T>>=
 par(mfrow = c(2,2))
 plot(adf@res, type='l', main='Residuals')
-plot(results[,23], main='Ljung-Box')
-acf(as.matrix(adf@res), lag.max=40)
-pacf(as.matrix(adf@res), lag.max=40)
+plot(all_box(adf@res), main='Ljung-Box')
+acf(as.matrix(adf@res), lag.max=60)
+pacf(as.matrix(adf@res), lag.max=60)
 @
             \end{figure}
 
             Tanto o gráfico dos resíduos quanto os gráficos das funções de autocorrelação e autocorrelação parcial indicam que os resíduos do teste se comportam como ruído branco. Os p-valores do teste de Ljung-Box não rejeitam a hipótese de independência dos resíduos.
-            Agora, apresentamos o sumário do teste.
+            
+            Agora, visualizamos as estatísticas do teste e os valores críticos        
             
 <<>>=
-summary(adf)
+adf@teststat
+adf@cval
 @
 
-            O valor da estatística do teste é de -2,9787. Os valores críticos para o teste são de -2,58 (1\%), -1,95 (5\%) e -1,62 (10\%). Sendo assim, o valor do teste ultrapassou os valores críticos para todos os graus de significância. O teste então rejeita a hipótese nula de presença de raiz unitária. O resultado obtido é, então, que a série temporal original é integrada de ordem um - I(1).
+            O valor da estatística do teste é de 3,4915. Os valores críticos para o teste são de -2,58 (1\%), -1,95 (5\%) e -1,62 (10\%). Sendo assim, o valor do teste ultrapassou os valores críticos para todos os graus de significância. O teste então rejeita a hipótese nula de presença de raiz unitária. O resultado obtido é, então, que a série temporal original é integrada de ordem um - I(1).
+            
+            
+        \subsubsection{Diferença Sazonal}
+    
+            A função de autocorrelação indica que existem lags sazonais significativos, no entando, o decaimento é rápido, indicanco não existência de raiz unitária sazonal.Testamos a seguir a hipótese nula de não presença de raiz unitária sazonal com o teste de Canova e Hansen (\cite{ch}).
+          
+<<warning=FALSE>>=
+ch = ch.test(ts(na.omit(data2$Diff), frequency=12), type="dummy", sid=c(1:12))
+ch$pvalues
+@
+
+            O teste retornou um p-valor de 0.6117, o que significa que não podemos rejeitar a hipótese nula de não presença de raiz unitária sazonal.

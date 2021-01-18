@@ -1,82 +1,27 @@
     \subsection{Estimação}
     
-        Na subseção anterior definimos as ordems máximas do modelo SARIMA. Nesta seção vamos estimar todos os modelos até as ordens máximas, testar seus resíduos para checar se comportam-se como ruído branco e, finalmente, escolher o modelo que passa o teste dos resíduos que apresente melhor critério de informação.
-        
-        Primeiramente, estimamaos todos os modelos até as ordens máximas (72 modelos) e realizamos os testes de Ljung-Box.
-        
-<<>>=
-ps <- c(2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0,2,1,0)
-qs <- c(3,3,3,2,2,2,1,1,1,0,0,0,3,3,3,2,2,2,1,1,1,0,0,0,3,3,3,2,2,2,1,1,1,0,0,0,3,3,3,2,2,2,1,1,1,0,0,0,3,3,3,2,2,2,1,1,1,0,0,0,3,3,3,2,2,2,1,1,1,0,0,0,3,3,3,2,2,2,1,1,1,0,0,0,3,3,3,2,2,2,1,1,1,0,0,0)
-Ps <- c(1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0)
-Qs <- c(3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
+        Na subseção anterior definimos as ordems máximas do modelo SARIMA. Nesta seção vamos estimar todos os modelos até as ordens máximas, testar seus resíduos para checar se comportam-se como ruído branco e, finalmente, escolher os modelos que passam o teste dos resíduos que apresentam melhores critérios de informação (AIC e BIC). Esses passos são realizados no \textit{chunk} abaixo.
+
+
+<<sarima_selection2, results="hide", fig.show="hide", warning=FALSE>>=
+order <- select_model(data2$Value,3,1,3,2,0,2,12)
 @
 
-<<sarima_estimation4, results="hide", fig.show="hide", warning=FALSE>>=
-results <- matrix(ncol=96,nrow=25)
-for (i in 1:96){
-    model <- sarima(data2$Value,
-                    ps[i], 1, qs[i],
-                    Ps[i], 0, Qs[i], 12)
-    for (e in 1:25){
-      box <- Box.test(model$fit$residuals,lag=e)
-      results[e,i] <- box$p.value
-    }
-}
-@
-
-        Em segundo lugar, escolhemos os modelos que passam no teste de Ljung-Box.
+        Abaixo, as ordens dos melhores modelos pelos critérios AIC e BIC.
 
 <<>>=
-models <- c()
-for (i in 1:96){
-    if (min(results[,i]) > .05){
-      models <- append(models, i)
-    }
-}
-models
-@
-            
-            
-        Como podemos ver, apenas seis modelos apresentam resíduos com comportamento de ruído branco. Os estimamos novamente para avaliar o critério de informação.
-            
-<<sarima_estimation5, results="hide", fig.show="hide", warning=FALSE>>=
-aics <- c()
-for (i in models){
-    model <- sarima(data2$Value,
-                    ps[i], 1, qs[i],
-                    Ps[i], 0, Qs[i], 12)
-    aics <- append(aics, model$AIC)
-}
+# Ordem pelo critério AIC
+print("p q P Q")
+order[,1]
+# Ordem pelo critério BIC
+print("p q P Q")
+order[,2]
 @
 
-        Abaixo, os critérios de informação de cada modelo.
-
-<<>>=
-models
-aics
-@
-
-        Escolhemos, então, o modelo com menor critério de informação.
-
-<<>>=
-ind <- which.min(aics)
-mod <- models[ind]
-ps[mod]
-qs[mod]
-Ps[mod]
-Qs[mod]
-@
-
-        O modelo com melhor critério de informação é o segundo, que corresponde ao 4 na lista dos 72 modelos, que é o SARIMA (1,1,2)(0,0,2)12. Estimamos então novamente esse modelo.
+        O modelo com melhor critério AIC é o SARIMA (3,1,1)(0,0,2)12. O modelo com melhor critério BIC é o SARIMA (1,1,2)(0,0,2)12. Pelo critério da parcimônia selecionamos o modelo com melhor critério BIC, pois é o que apresenta menor quantidade de parâmetros.
             
-<<sarima_estimation6, results="hide", fig.show="hide", warning=FALSE>>=
+<<sarima_estimation2, results="hide", fig.show="hide", warning=FALSE>>=
 model2 <- sarima(data2$Value,
-                1, 1, 3,
-                1, 0, 3, 12)
-@
-
-        Abaixo, o sumário do modelo.
-        
-<<>>=
-print(model2)
+                1, 1, 2,
+                0, 0, 2, 12)
 @

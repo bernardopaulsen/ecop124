@@ -4,20 +4,21 @@
         \caption{FAC da Primeira Diferença}
         \centering
 <<fig=T, fig.with=6, fig.height=4>>=
-acf(as.matrix(na.omit(data1$Diff)), lag.max=40)
+acf(as.matrix(na.omit(data1$Diff)), lag.max=60)
 @
         \end{figure}
         
-        A função de autocorrelação tem até o segundo lag significativo, enquanto mostra um lag significativo no fator sazonal.
+        A função de autocorrelação trunca após o segundo lag. Como mencionado anteriormente, a FAC da série da primeira diferença mostra que há decaimento rápido do padrão de sazonalidade (múltiplo de 12) a partir do lag número 24.
+        
         
         \begin{figure}[H]
         \caption{FACP da Primeira Diferença}
         \centering
 <<fig=T, fig.with=6, fig.height=4>>=
-pacf(as.matrix(na.omit(data1$Diff)), lag.max=40)
+pacf(as.matrix(na.omit(data1$Diff)), lag.max=60)
 @
         \end{figure}
 
-        A função de autocorrelação parcial tem até o terceiro lag significativo, enquanto mostra dois lags significativos no fator sazonal.
+        A função de autocorrelação parcial tem até o terceiro lag significativo, enquanto mostra três lags significativos no fator sazonal.
         
-        A análise das funções acima sugere que uma ordem máxima para o modelo SARIMA é (2,1,3)(1,0,2)12.
+        A análise das funções acima sugere que uma ordem máxima para o modelo SARIMA é (3,1,2)(3,0,2)12.

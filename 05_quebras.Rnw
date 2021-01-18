@@ -36,6 +36,7 @@ sctest(dataset~1, type="OLS-CUSUM")
     
 <<>>=
 point <- which.min(efp1$process)
+point
 @
 
     \subsection{Divisão da Série Temporal}

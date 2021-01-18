@@ -84,23 +84,24 @@
 
 \section{Preparatórios}
 
-    Primeriamente, precisamos importar as bibliotecas que serão necessárias para executar os códigos das próximas seções. Utilizamos as seguintes bibliotecas:
+    \subsection{Importação de Bibliotecas}
+
+        Primeriamente, precisamos importar as bibliotecas que serão necessárias para executar os códigos das próximas seções. Utilizamos as seguintes bibliotecas:
     
-    \begin{itemize}
-        \item \textit{astsa} (\cite{astsa}): função \textit{sarima}.
-        \item \textit(DescTools) (\cite{desctools}): função \textit{TheilU};
-        \item \textit{forecast} (\cite{forecast}): funções \textit{auto.arima} e \textit{forecast};
-        \item \textit{lubridate} (\cite{lubridate}): função \textit{parse\underline{ }date\underline{ }time};
-        \item \textit{notsTest} (\cite{nortstest}): função \textit{Lm.test};
-        \item \textit{quantmod} (\cite{quantmod}): função \textit{xts};
-        \item \textit{rugarch} (\cite{rugarch}): funções \textit{ugarchfit}, \textit{ugarchforecast} e \textit{ugarchspec};
-        \item \textit{stats} (\cite{stats}): funções \textit{acf} e \textit{Box.test};
-        \item \textit{strucchange} (\cite{strucchange}): funções \textit{efp} e \textit{sctest};
-        \item \textit{tseries} (\cite{tseries}): função \textit{pacf};
-        \item \textit{tsoutliers} (\cite{tsoutliers}): funções \textit{tso} e \textit{tsclean};
-        \item \textit{urca} (\cite{urca}): função \textit{ur.df};
-        \item \textit{uroot} (\cite{uroot}): função \textit{ch.test}.
-    \end{itemize}
+        \begin{itemize}
+            \item \textit{astsa} (\cite{astsa}): função \textit{sarima}.
+            \item \textit{DescTools} (\cite{desctools}): função \textit{TheilU};
+            \item \textit{forecast} (\cite{forecast}): função \textit{accuracy};
+            \item \textit{lubridate} (\cite{lubridate}): função \textit{parse\underline{ }date\underline{ }time};
+            \item \textit{notsTest} (\cite{nortstest}): função \textit{Lm.test};
+            \item \textit{quantmod} (\cite{quantmod}): função \textit{xts};
+            \item \textit{stats} (\cite{stats}): funções \textit{acf} e \textit{Box.test};
+            \item \textit{strucchange} (\cite{strucchange}): funções \textit{efp} e \textit{sctest};
+            \item \textit{tseries} (\cite{tseries}): função \textit{pacf};
+            \item \textit{tsoutliers} (\cite{tsoutliers}): funções \textit{tso} e \textit{tsclean};
+            \item \textit{urca} (\cite{urca}): função \textit{ur.df};
+            \item \textit{uroot} (\cite{uroot}): função \textit{ch.test}.
+        \end{itemize}
     
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -111,7 +112,6 @@
 \hlkwd{library}\hlstd{(}\hlstr{'lubridate'}\hlstd{)}
 \hlkwd{library}\hlstd{(}\hlstr{'nortsTest'}\hlstd{)}
 \hlkwd{library}\hlstd{(}\hlstr{'quantmod'}\hlstd{)}
-\hlkwd{library}\hlstd{(}\hlstr{'rugarch'}\hlstd{)}
 \hlkwd{library}\hlstd{(}\hlstr{'stats'}\hlstd{)}
 \hlkwd{library}\hlstd{(}\hlstr{'strucchange'}\hlstd{)}
 \hlkwd{library}\hlstd{(}\hlstr{'tseries'}\hlstd{)}
@@ -122,7 +122,143 @@
 \end{kframe}
 \end{knitrout}
 
-    Antes de importar os dados é necessário selecionar como diretório de trabalho a pasta que contém o arquivo com os dados.
+    \subsection{Definição de Funções}
+    
+        Abaixo definimos as funções que serão utilizadas ao longo do trabalho.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{all_box} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{data}\hlstd{)\{}
+  \hlcom{# Retorna os p-valores de testes de Ljung-Box até o lag 25}
+  \hlstd{boxs} \hlkwb{<-} \hlkwd{matrix}\hlstd{(}\hlkwc{nrow}\hlstd{=}\hlnum{25}\hlstd{,}\hlkwc{ncol}\hlstd{=}\hlnum{1}\hlstd{)}
+  \hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{25}\hlstd{)\{}
+    \hlstd{box} \hlkwb{<-} \hlkwd{Box.test}\hlstd{(data,}\hlkwc{lag}\hlstd{=i)}
+    \hlstd{boxs[i]} \hlkwb{<-} \hlstd{box}\hlopt{$}\hlstd{p.value}
+  \hlstd{\}}
+  \hlkwd{return}\hlstd{(boxs)}
+\hlstd{\}}
+
+\hlstd{select_adf} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{data}\hlstd{,} \hlkwc{typ}\hlstd{)\{}
+  \hlcom{# Retorna o menor lag do teste ADF no qual os residuos se comportam como}
+  \hlcom{#ruido branco.}
+  \hlstd{results} \hlkwb{<-} \hlkwd{matrix}\hlstd{(,}\hlkwc{nrow}\hlstd{=}\hlnum{25}\hlstd{,}\hlkwc{ncol}\hlstd{=}\hlnum{24}\hlstd{)}
+  \hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{24}\hlstd{)\{}
+    \hlstd{adf} \hlkwb{<-} \hlkwd{ur.df}\hlstd{(data,} \hlkwc{type}\hlstd{=typ,} \hlkwc{lags}\hlstd{=i)}
+    \hlstd{results[,i]} \hlkwb{<-} \hlkwd{all_box}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{)}
+  \hlstd{\}}
+  \hlstd{oks} \hlkwb{<-} \hlkwd{c}\hlstd{()}
+  \hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{24}\hlstd{)\{}
+    \hlkwa{if} \hlstd{(}\hlkwd{min}\hlstd{(results[,i])} \hlopt{>} \hlnum{.05}\hlstd{)\{}
+      \hlstd{oks} \hlkwb{<-} \hlkwd{append}\hlstd{(oks, i)}
+    \hlstd{\}}
+  \hlstd{\}}
+  \hlkwd{return}\hlstd{(oks[}\hlnum{1}\hlstd{])}
+\hlstd{\}}
+
+\hlstd{all_orders} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{max_p}\hlstd{,} \hlkwc{max_q}\hlstd{,} \hlkwc{max_P}\hlstd{,} \hlkwc{max_Q}\hlstd{)\{}
+  \hlcom{# Retorna matriz com todas as ordens possiveis para o SARIMA dadas as ordens}
+  \hlcom{#maximas.}
+  \hlstd{ps} \hlkwb{=} \hlkwd{c}\hlstd{()}
+  \hlstd{qs} \hlkwb{=} \hlkwd{c}\hlstd{()}
+  \hlstd{Ps} \hlkwb{=} \hlkwd{c}\hlstd{()}
+  \hlstd{Qs} \hlkwb{=} \hlkwd{c}\hlstd{()}
+  \hlkwa{for} \hlstd{(p} \hlkwa{in} \hlnum{0}\hlopt{:}\hlstd{max_p)\{}
+    \hlkwa{for} \hlstd{(q} \hlkwa{in} \hlnum{0}\hlopt{:}\hlstd{max_q)\{}
+      \hlkwa{for} \hlstd{(P} \hlkwa{in} \hlnum{0}\hlopt{:}\hlstd{max_P)\{}
+        \hlkwa{for} \hlstd{(Q} \hlkwa{in} \hlnum{0}\hlopt{:}\hlstd{max_Q)\{}
+          \hlstd{ps} \hlkwb{<-} \hlkwd{append}\hlstd{(ps,p)}
+          \hlstd{qs} \hlkwb{<-} \hlkwd{append}\hlstd{(qs,q)}
+          \hlstd{Ps} \hlkwb{<-} \hlkwd{append}\hlstd{(Ps,P)}
+          \hlstd{Qs} \hlkwb{<-} \hlkwd{append}\hlstd{(Qs,Q)}
+        \hlstd{\}}
+      \hlstd{\}}
+    \hlstd{\}}
+  \hlstd{\}}
+  \hlstd{order_s} \hlkwb{<-} \hlkwd{matrix}\hlstd{(}\hlkwd{c}\hlstd{(ps,qs,Ps,Qs),}\hlkwc{ncol}\hlstd{=}\hlnum{4}\hlstd{)}
+  \hlkwd{return}\hlstd{(order_s)}
+\hlstd{\}}
+
+\hlstd{estimate} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{data}\hlstd{,}\hlkwc{d}\hlstd{,}\hlkwc{D}\hlstd{,}\hlkwc{order}\hlstd{,}\hlkwc{f}\hlstd{)\{}
+  \hlcom{# Estima um modelo SARIMA}
+  \hlstd{res}    \hlkwb{<-} \hlkwd{matrix}\hlstd{(}\hlkwc{nrow}\hlstd{=}\hlnum{27}\hlstd{)}
+  \hlstd{model}  \hlkwb{<-} \hlkwd{sarima}\hlstd{(data,}
+                  \hlstd{order[}\hlnum{1}\hlstd{], d, order[}\hlnum{2}\hlstd{],}
+                  \hlstd{order[}\hlnum{3}\hlstd{], D, order[}\hlnum{4}\hlstd{], f)}
+  \hlstd{res[}\hlnum{1}\hlstd{]} \hlkwb{<-} \hlstd{model}\hlopt{$}\hlstd{AIC}
+  \hlstd{res[}\hlnum{2}\hlstd{]} \hlkwb{<-} \hlstd{model}\hlopt{$}\hlstd{BIC}
+  \hlkwa{for} \hlstd{(e} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{25}\hlstd{)\{}
+    \hlstd{box} \hlkwb{<-} \hlkwd{Box.test}\hlstd{(model}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals,}\hlkwc{lag}\hlstd{=e)}
+    \hlstd{res[e}\hlopt{+}\hlnum{2}\hlstd{]} \hlkwb{<-} \hlstd{box}\hlopt{$}\hlstd{p.value}
+  \hlstd{\}}
+  \hlkwd{return}\hlstd{(res)}
+\hlstd{\}}
+
+\hlstd{select_model} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{data}\hlstd{,}\hlkwc{max_p}\hlstd{,}\hlkwc{d}\hlstd{,}\hlkwc{max_q}\hlstd{,}\hlkwc{max_P}\hlstd{,}\hlkwc{D}\hlstd{,}\hlkwc{max_Q}\hlstd{,}\hlkwc{freq}\hlstd{)\{}
+  \hlcom{# Seleciona o melhor modelo SARIMA seguindo a metodologia Box-Jenkins}
+  \hlstd{all_order} \hlkwb{<-} \hlkwd{all_orders}\hlstd{(max_p,max_q,max_P,max_Q)}
+  \hlstd{len}       \hlkwb{<-} \hlkwd{length}\hlstd{(all_order[,}\hlnum{1}\hlstd{])}
+  \hlstd{results}   \hlkwb{<-} \hlkwd{matrix}\hlstd{(}\hlkwc{ncol}\hlstd{=len,}\hlkwc{nrow}\hlstd{=}\hlnum{27}\hlstd{)}
+  \hlkwd{print}\hlstd{(}\hlstr{'Modelos a estimar:'}\hlstd{)}
+  \hlkwd{print}\hlstd{(len)}
+  \hlkwd{print}\hlstd{(}\hlstr{'Estimando modelos, calculando AICs e fazendo testes de Ljung-Box...'}\hlstd{)}
+  \hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlstd{len)\{}
+    \hlstd{order} \hlkwb{<-} \hlstd{all_order[i,]}
+    \hlstd{res}   \hlkwb{<-} \hlkwd{tryCatch}\hlstd{(}\hlkwd{estimate}\hlstd{(data,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,order,}\hlnum{12}\hlstd{),}
+                      \hlkwc{error} \hlstd{=} \hlkwa{function}\hlstd{(}\hlkwc{e}\hlstd{)\{}
+                          \hlkwd{return}\hlstd{(}\hlkwd{matrix}\hlstd{(}\hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{),}\hlkwc{nrow}\hlstd{=}\hlnum{27}\hlstd{))}
+                      \hlstd{\})}
+    \hlstd{results[,i]} \hlkwb{<-} \hlstd{res}
+  \hlstd{\}}
+  \hlkwd{print}\hlstd{(}\hlstr{'Selecionando os modelos que pelo teste de Ljung-Box...'}\hlstd{)}
+  \hlstd{models} \hlkwb{<-} \hlkwd{c}\hlstd{()}
+  \hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlstd{len)\{}
+    \hlkwa{if} \hlstd{(}\hlkwd{min}\hlstd{(results[}\hlnum{3}\hlopt{:}\hlnum{27}\hlstd{,i])} \hlopt{>} \hlnum{.05}\hlstd{)\{}
+      \hlstd{models} \hlkwb{<-} \hlkwd{append}\hlstd{(models,i)}
+    \hlstd{\}}
+  \hlstd{\}}
+  \hlkwd{print}\hlstd{(}\hlstr{'Modelos selecionados:'}\hlstd{)}
+  \hlkwd{print}\hlstd{(}\hlstr{'p q P Q'}\hlstd{)}
+  \hlkwa{for} \hlstd{(m} \hlkwa{in} \hlstd{models)\{}
+    \hlkwd{print}\hlstd{(all_order[m,])}
+  \hlstd{\}}
+  \hlkwd{print}\hlstd{(}\hlstr{'Verificando menor AIC...'}\hlstd{)}
+  \hlstd{aics} \hlkwb{<-} \hlstd{results[}\hlnum{1}\hlstd{,models]}
+  \hlstd{bics} \hlkwb{<-} \hlstd{results[}\hlnum{2}\hlstd{,models]}
+  \hlstd{inda} \hlkwb{<-} \hlkwd{which.min}\hlstd{(aics)}
+  \hlstd{indb} \hlkwb{<-} \hlkwd{which.min}\hlstd{(bics)}
+  \hlstd{moda} \hlkwb{<-} \hlstd{models[inda]}
+  \hlstd{modb} \hlkwb{<-} \hlstd{models[indb]}
+  \hlkwd{print}\hlstd{(}\hlstr{'Modelo selecionado por critério AIC:'}\hlstd{)}
+  \hlkwd{print}\hlstd{(}\hlstr{'p q P Q'}\hlstd{)}
+  \hlkwd{print}\hlstd{(all_order[moda,])}
+  \hlkwd{print}\hlstd{(}\hlstr{'Modelo selecionado por critério BIC:'}\hlstd{)}
+  \hlkwd{print}\hlstd{(}\hlstr{'p q P Q'}\hlstd{)}
+  \hlkwd{print}\hlstd{(all_order[modb,])}
+  \hlstd{both} \hlkwb{<-} \hlkwd{matrix}\hlstd{(}\hlkwd{c}\hlstd{(all_order[moda,],all_order[modb,]),} \hlkwc{nrow}\hlstd{=}\hlnum{4}\hlstd{)}
+  \hlkwd{return}\hlstd{(both)}
+\hlstd{\}}
+
+\hlstd{prediction} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{data}\hlstd{,} \hlkwc{p}\hlstd{,} \hlkwc{q}\hlstd{,} \hlkwc{P}\hlstd{,} \hlkwc{Q}\hlstd{)\{}
+  \hlstd{fs} \hlkwb{<-} \hlkwd{c}\hlstd{()}
+  \hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{10}\hlopt{:}\hlnum{1}\hlstd{)\{}
+    \hlstd{start}      \hlkwb{<-} \hlnum{10} \hlopt{-} \hlstd{i}
+    \hlstd{until}      \hlkwb{<-} \hlkwd{length}\hlstd{(data)}\hlopt{-}\hlstd{i}
+    \hlstd{data}       \hlkwb{<-} \hlstd{data1}\hlopt{$}\hlstd{Value[start}\hlopt{:}\hlstd{until]}
+    \hlstd{prediction} \hlkwb{<-} \hlkwd{sarima.for}\hlstd{(data,} \hlnum{1}\hlstd{,}
+                             \hlstd{p,} \hlnum{1}\hlstd{, q,}
+                             \hlstd{P,} \hlnum{0}\hlstd{, Q,} \hlnum{12}\hlstd{)}
+    \hlstd{fs} \hlkwb{<-} \hlkwd{append}\hlstd{(fs, prediction}\hlopt{$}\hlstd{pred)}
+  \hlstd{\}}
+    \hlkwd{return}\hlstd{(fs)}
+\hlstd{\}}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+    \subsection{Definição do Diretório de Trabalho}
+
+        Antes de importar os dados é necessário selecionar como diretório de trabalho a pasta que contém o arquivo com os dados.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
@@ -251,7 +387,7 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
      \hlkwc{ylab} \hlstd{=} \hlstr{'Valor'}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-17-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-18-1} 
 
 \end{knitrout}
         \end{figure}
@@ -324,7 +460,7 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{plot}\hlstd{(dataset)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-21-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-22-1} 
 
 \end{knitrout}
     \end{figure}
@@ -355,7 +491,7 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{plot}\hlstd{(efp1)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-23-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-24-1} 
 
 \end{knitrout}
         \end{figure}
@@ -391,7 +527,11 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{point} \hlkwb{<-} \hlkwd{which.min}\hlstd{(efp1}\hlopt{$}\hlstd{process)}
+\hlstd{point}
 \end{alltt}
+\begin{verbatim}
+## [1] 468
+\end{verbatim}
 \end{kframe}
 \end{knitrout}
 
@@ -441,7 +581,7 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 
 
 
-\section{Primeira Série Temporal}
+\section{Primeira Parte da Série Temporal}
 
     \subsection{Definição da Ordem de Integração}
     
@@ -460,12 +600,12 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{plot}\hlstd{(data1)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-28-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-29-1} 
 
 \end{knitrout}
             \end{figure}
             
-            A visualização da série temporal indica presença de raiz unitária. Para coletar mais indícios visuais analisamos abaixo a função de autocorrelação.
+            O gráfico assemelha-se a um passeio aleatório, portanto, indicandio a presença de raíz unitária. Para coletar mais indícios analisamos abaixo a função de autocorrelação e a função de autocorrelação parcial.
             
             \begin{figure}[H]
             \caption{FAC da Série Temporal}
@@ -473,10 +613,10 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(data1),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
+\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(data1),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-29-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-30-1} 
 
 \end{knitrout}
             \end{figure}
@@ -487,112 +627,41 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(data1),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
+\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(data1),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-30-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-31-1} 
 
 \end{knitrout}
             \end{figure}
             
-            A função de autocorrelação aparentemente possui decaimento linear, indicando possibilidade de raiz unitária. Para testar a hipótese de presença de raiz unitária com o teste Dickey-Fuller aumentado (\cite{adf}). O teste será realizado com \textit{drift}, pois a visualização do gráfico da série temporal indica a presença de tal. Para escolher o lag do teste, começaremos pelo lag 1 e, caso os resíduos do teste forem ruído branco, aceitamos o lag. Caso os resíduos não apresentarem comportamento de ruído branco, repetimos os passos com o lag imediatamente maior. No \textit{chunk} abaixo realizamos testes ADF para 24 lags, e para cada teste testamos os resíduos com testes de Ljung-Box (\cite{ljungbox}) até 25 lags.
+            A função de autocorrelação aparentemente possui decaimento lento, indicando possibilidade de raiz unitária. Para testar a hipótese de presença de raiz unitária cutilizamos o teste Dickey-Fuller aumentado (\cite{adf}). O teste será realizado sem \textit{drift} ou tendência, pois a visualização do gráfico da série temporal indica a não presença de tais. Para escolher o lag do teste, começaremos pelo lag 1 e, caso os resíduos do teste forem ruído branco, aceitamos o lag. Caso os resíduos não apresentarem comportamento de ruído branco, repetimos os passos com o lag imediatamente maior. No \textit{chunk} abaixo realizamos esse passos para encontrar o menor lag que retorna resíduos que sejam ruído branco.
+
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{results} \hlkwb{<-} \hlkwd{matrix}\hlstd{(,}\hlkwc{nrow}\hlstd{=}\hlnum{25}\hlstd{,}\hlkwc{ncol}\hlstd{=}\hlnum{24}\hlstd{)}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{24}\hlstd{)\{}
-  \hlstd{adf} \hlkwb{<-} \hlkwd{ur.df}\hlstd{(data1}\hlopt{$}\hlstd{Value,} \hlkwc{type}\hlstd{=}\hlstr{'drift'}\hlstd{,} \hlkwc{lags}\hlstd{=i)}
-  \hlkwa{for} \hlstd{(e} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{25}\hlstd{)\{}
-    \hlstd{box} \hlkwb{<-} \hlkwd{Box.test}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{,}\hlkwc{lag}\hlstd{=e)}
-    \hlstd{results[e,i]} \hlkwb{<-} \hlstd{box}\hlopt{$}\hlstd{p.value}
-  \hlstd{\}}
-\hlstd{\}}
+\hlstd{lag} \hlkwb{<-} \hlkwd{select_adf}\hlstd{(data1}\hlopt{$}\hlstd{Value,}\hlstr{"none"}\hlstd{)}
+\hlstd{lag}
 \end{alltt}
+\begin{verbatim}
+## [1] 24
+\end{verbatim}
 \end{kframe}
 \end{knitrout}
 
-
-            Nas figuras abaixo encontram-se os resultados dos testes de Ljung-Box para os resíduos de cada um dos testes de Dickey-Fuller aumentados.
-
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 1 a 6}
-            \centering
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{))}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{6}\hlstd{)\{}
-  \hlkwd{plot}\hlstd{(results[,i],} \hlkwc{main}\hlstd{=i)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-32-1} 
-
-\end{knitrout}
-            \end{figure}
-            
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 7 a 12}
-            \centering
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{))}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{7}\hlopt{:}\hlnum{12}\hlstd{)\{}
-  \hlkwd{plot}\hlstd{(results[,i],} \hlkwc{main}\hlstd{=i)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-33-1} 
-
-\end{knitrout}
-            \end{figure}
-            
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 13 a 18}
-            \centering
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{))}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{13}\hlopt{:}\hlnum{18}\hlstd{)\{}
-  \hlkwd{plot}\hlstd{(results[,i],} \hlkwc{main}\hlstd{=i)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-34-1} 
-
-\end{knitrout}
-            \end{figure}
-
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 19 a 24}
-            \centering
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{))}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{19}\hlopt{:}\hlnum{24}\hlstd{)\{}
-  \hlkwd{plot}\hlstd{(results[,i],} \hlkwc{main}\hlstd{=i)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-35-1} 
-
-\end{knitrout}
-            \end{figure}
-            
-            Nos gráficos acima podemos ver que a única ordem de lags que gera resíduos que são ruído branco é a ordem 24, então realizamos o teste com essa ordem.
+            Os resultados dos passos anteriores indicam que o menor lag para o teste é o 24, então realizamos o teste com essa ordem.
             
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{adf} \hlkwb{<-} \hlkwd{ur.df}\hlstd{(data1}\hlopt{$}\hlstd{Value,} \hlkwc{type}\hlstd{=}\hlstr{'drift'}\hlstd{,} \hlkwc{lags}\hlstd{=}\hlnum{24}\hlstd{)}
+\hlstd{adf} \hlkwb{<-} \hlkwd{ur.df}\hlstd{(data1}\hlopt{$}\hlstd{Value,} \hlkwc{type}\hlstd{=}\hlstr{"none"}\hlstd{,} \hlkwc{lags}\hlstd{=lag)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
 
+            Abaixo analisamos os resíduos do teste.
+            
             \begin{figure}[H]
             \caption{Resíduos}
             \centering
@@ -601,88 +670,40 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \begin{alltt}
 \hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{))}
 \hlkwd{plot}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{,} \hlkwc{type}\hlstd{=}\hlstr{'l'}\hlstd{,} \hlkwc{main}\hlstd{=}\hlstr{'Residuals'}\hlstd{)}
-\hlkwd{plot}\hlstd{(results[,}\hlnum{24}\hlstd{],} \hlkwc{main}\hlstd{=}\hlstr{'Ljung-Box'}\hlstd{)}
-\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
-\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
+\hlkwd{plot}\hlstd{(}\hlkwd{all_box}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{main}\hlstd{=}\hlstr{'Ljung-Box'}\hlstd{)}
+\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
+\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-37-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-34-1} 
 
 \end{knitrout}
             \end{figure}
 
             Tanto o gráfico dos resíduos quanto os gráficos das funções de autocorrelação e autocorrelação parcial indicam que os resíduos do teste se comportam como ruído branco. Os p-valores do teste de Ljung-Box não rejeitam a hipótese de independência dos resíduos.
 
-            Agora, visualizamos o sumário do teste.        
+            Agora, visualizamos as estatísticas do teste e os valores críticos        
             
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{summary}\hlstd{(adf)}
+\hlstd{adf}\hlopt{@}\hlkwc{teststat}
 \end{alltt}
 \begin{verbatim}
-## 
-## ############################################### 
-## # Augmented Dickey-Fuller Test Unit Root Test # 
-## ############################################### 
-## 
-## Test regression drift 
-## 
-## 
-## Call:
-## lm(formula = z.diff ~ z.lag.1 + 1 + z.diff.lag)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -0.22223 -0.05501 -0.00398  0.05128  0.42905 
-## 
-## Coefficients:
-##               Estimate Std. Error t value Pr(>|t|)    
-## (Intercept)   0.012568   0.015044   0.835   0.4039    
-## z.lag.1      -0.005905   0.007713  -0.766   0.4444    
-## z.diff.lag1  -0.248088   0.047395  -5.234 2.63e-07 ***
-## z.diff.lag2  -0.199103   0.048971  -4.066 5.73e-05 ***
-## z.diff.lag3  -0.101610   0.049779  -2.041   0.0419 *  
-## z.diff.lag4   0.058018   0.049808   1.165   0.2448    
-## z.diff.lag5   0.051130   0.049664   1.030   0.3038    
-## z.diff.lag6   0.108875   0.049703   2.190   0.0290 *  
-## z.diff.lag7   0.113831   0.049872   2.282   0.0230 *  
-## z.diff.lag8   0.013664   0.049902   0.274   0.7844    
-## z.diff.lag9   0.072790   0.049379   1.474   0.1412    
-## z.diff.lag10  0.140793   0.048782   2.886   0.0041 ** 
-## z.diff.lag11  0.089136   0.049219   1.811   0.0709 .  
-## z.diff.lag12 -0.119215   0.049379  -2.414   0.0162 *  
-## z.diff.lag13 -0.010514   0.049107  -0.214   0.8306    
-## z.diff.lag14  0.033982   0.048935   0.694   0.4878    
-## z.diff.lag15 -0.043762   0.048442  -0.903   0.3668    
-## z.diff.lag16  0.022091   0.048367   0.457   0.6481    
-## z.diff.lag17 -0.004231   0.048328  -0.088   0.9303    
-## z.diff.lag18  0.071577   0.048143   1.487   0.1378    
-## z.diff.lag19  0.033270   0.047968   0.694   0.4883    
-## z.diff.lag20 -0.077872   0.047713  -1.632   0.1034    
-## z.diff.lag21 -0.070659   0.047849  -1.477   0.1405    
-## z.diff.lag22 -0.053579   0.047661  -1.124   0.2616    
-## z.diff.lag23  0.016124   0.046540   0.346   0.7292    
-## z.diff.lag24 -0.253202   0.044893  -5.640 3.14e-08 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## Residual standard error: 0.08449 on 416 degrees of freedom
-## Multiple R-squared:  0.2345,	Adjusted R-squared:  0.1885 
-## F-statistic: 5.098 on 25 and 416 DF,  p-value: 2.328e-13
-## 
-## 
-## Value of test-statistic is: -0.7656 0.3598 
-## 
-## Critical values for test statistics: 
+##                tau1
+## statistic 0.1471326
+\end{verbatim}
+\begin{alltt}
+\hlstd{adf}\hlopt{@}\hlkwc{cval}
+\end{alltt}
+\begin{verbatim}
 ##       1pct  5pct 10pct
-## tau2 -3.44 -2.87 -2.57
-## phi1  6.47  4.61  3.79
+## tau1 -2.58 -1.95 -1.62
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
 
-            O valor da estatística do teste é de -0,7656. Os valores críticos para o teste são de -3,44 (1\%), -2,87 (5\%) e -2,5 (10\%). Sendo assim, o valor do teste não ultrapassou os valores críticos para nenhum grau de significância. O teste então aceita a hipótese nula de presença de raiz unitária.
+            O valor da estatística do teste é de 0,1471. Os valores críticos para o teste são de -2,58 (1\%), -1,95 (5\%) e -1,62 (10\%). Sendo assim, o valor do teste não ultrapassou os valores críticos para nenhum grau de significância. O teste indica que não há evidências suficientes para rejeitarmos a hipótese nula de presença de raíz unitária.
 
         \subsubsection{Diferenciação}
         
@@ -729,12 +750,12 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{plot}\hlstd{(data1}\hlopt{$}\hlstd{Diff)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-41-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-38-1} 
 
 \end{knitrout}
             \end{figure}
             
-            A visualização da série temporal não indica presença de raiz unitária. Para coletar mais indícios visuais analisamos abaixo a função de autocorrelação.
+            A analise visual do gráfico sugere variação em torno de uma média sem distanciamento grande por longos períodos, portanto, indica que a estacionariedade da série foi obtida na primeira diferenciação.
             
             \begin{figure}[H]
             \caption{FAC da Primeira Diferença}
@@ -742,10 +763,10 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(}\hlkwd{na.omit}\hlstd{(data1}\hlopt{$}\hlstd{Diff)),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
+\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(}\hlkwd{na.omit}\hlstd{(data1}\hlopt{$}\hlstd{Diff)),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-42-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-39-1} 
 
 \end{knitrout}
             \end{figure}
@@ -756,134 +777,34 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(}\hlkwd{na.omit}\hlstd{(data1}\hlopt{$}\hlstd{Diff)),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
+\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(}\hlkwd{na.omit}\hlstd{(data1}\hlopt{$}\hlstd{Diff)),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-43-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-40-1} 
 
 \end{knitrout}
             \end{figure}
             
-            A função de autocorrelação indica padrão sazonal, então pode ser que seja necessário diferenciar sazonalmente a série diferenciada para transforma-la em estacionária. Testamos a seguir a hipótese nula de não presença de raiz unitária sazonal com o teste de Canova e Hansen (\cite{ch}).
-          
+            A análise dos gráficos pós diferenciação indica rápido decaimento nas funções ACF e PACF, reforçando a hipótese de que não há raíz unitária. Agora testaremos, com o teste de Dickey-Fuller aumentado, a presença de raiz unitária. Não adicionaremos drift ou tendância no teste pois não há indício pelo gráfico da série de existência de algum desses parâmetros. Seguiremos os passos descritos acima, quando aplicamos o teste na série temporal original.
+
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{ch} \hlkwb{=} \hlkwd{ch.test}\hlstd{(}\hlkwd{ts}\hlstd{(}\hlkwd{na.omit}\hlstd{(data1}\hlopt{$}\hlstd{Diff),} \hlkwc{frequency}\hlstd{=}\hlnum{12}\hlstd{),} \hlkwc{type}\hlstd{=}\hlstr{"dummy"}\hlstd{,} \hlkwc{sid}\hlstd{=}\hlkwd{c}\hlstd{(}\hlnum{1}\hlopt{:}\hlnum{12}\hlstd{))}
-\hlkwd{print}\hlstd{(ch)}
+\hlstd{lag} \hlkwb{<-} \hlkwd{select_adf}\hlstd{(}\hlkwd{na.omit}\hlstd{(data1}\hlopt{$}\hlstd{Diff),}\hlstr{"none"}\hlstd{)}
+\hlstd{lag}
 \end{alltt}
 \begin{verbatim}
-## 
-## 	Canova and Hansen test for seasonal stability
-## 
-## data:  ts(na.omit(data1$Diff), frequency = 12)
-## 
-##      statistic pvalue  
-## [1,]    1.3662 0.5465  
-## ---
-## Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
-## 
-## Test type: seasonal dummies 
-## NW covariance matrix lag order: 18 
-## First order lag: no 
-## Other regressors: no  
-## P-values: interpolation in original tables
+## [1] 23
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
 
-            O teste retornou um p-valor de 0.5465, o que significa que não podemos rejeitar a hipótese nula de não presença de raiz unitária sazonal.
-            Agora que sabemos que não existe raiz unitária sazonal, testaremos, com o teste de Dickey-Fuller aumentado, a presença de raiz unitária não sazonal. Seguiremos os passos descritos acima, quando aplicamos o teste na série temporal original.
-
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{results} \hlkwb{<-} \hlkwd{matrix}\hlstd{(,}\hlkwc{nrow}\hlstd{=}\hlnum{25}\hlstd{,}\hlkwc{ncol}\hlstd{=}\hlnum{24}\hlstd{)}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{24}\hlstd{)\{}
-  \hlstd{adf} \hlkwb{<-} \hlkwd{ur.df}\hlstd{(}\hlkwd{na.omit}\hlstd{(data1}\hlopt{$}\hlstd{Diff),} \hlkwc{type}\hlstd{=}\hlstr{'drift'}\hlstd{,} \hlkwc{lags}\hlstd{=i)}
-  \hlkwa{for} \hlstd{(e} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{25}\hlstd{)\{}
-    \hlstd{box} \hlkwb{<-} \hlkwd{Box.test}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{,}\hlkwc{lag}\hlstd{=e)}
-    \hlstd{results[e,i]} \hlkwb{<-} \hlstd{box}\hlopt{$}\hlstd{p.value}
-  \hlstd{\}}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
-
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 1 a 6}
-            \centering
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{))}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{6}\hlstd{)\{}
-  \hlkwd{plot}\hlstd{(results[,i],} \hlkwc{main}\hlstd{=i)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-46-1} 
-
-\end{knitrout}
-            \end{figure}
-            
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 7 a 12}
-            \centering
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{))}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{7}\hlopt{:}\hlnum{12}\hlstd{)\{}
-  \hlkwd{plot}\hlstd{(results[,i],} \hlkwc{main}\hlstd{=i)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-47-1} 
-
-\end{knitrout}
-            \end{figure}
-            
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 13 a 18}
-            \centering
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{))}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{13}\hlopt{:}\hlnum{18}\hlstd{)\{}
-  \hlkwd{plot}\hlstd{(results[,i],} \hlkwc{main}\hlstd{=i)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-48-1} 
-
-\end{knitrout}
-            \end{figure}
-
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 19 a 24}
-            \centering
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{))}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{19}\hlopt{:}\hlnum{24}\hlstd{)\{}
-  \hlkwd{plot}\hlstd{(results[,i],} \hlkwc{main}\hlstd{=i)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-49-1} 
-
-\end{knitrout}
-            \end{figure}
-
-            Nos gráficos acima podemos ver que a primeira ordem de lags que gera resíduos que são ruído branco é a ordem 23, então realizamos o teste com essa ordem e apresentamos os gráficos dos resíduos e dos testes nos resíduos.
+          Os resultados dos passos anteriores indicam que o menor lag para o teste é o 23, então realizamos o teste com essa ordem.
             
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{adf} \hlkwb{<-} \hlkwd{ur.df}\hlstd{(}\hlkwd{na.omit}\hlstd{(data1}\hlopt{$}\hlstd{Diff),} \hlkwc{lags}\hlstd{=}\hlnum{23}\hlstd{)}
+\hlstd{adf} \hlkwb{<-} \hlkwd{ur.df}\hlstd{(}\hlkwd{na.omit}\hlstd{(data1}\hlopt{$}\hlstd{Diff),}\hlstr{"none"}\hlstd{,}\hlkwc{lags}\hlstd{=lag)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -896,85 +817,58 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \begin{alltt}
 \hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{))}
 \hlkwd{plot}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{,} \hlkwc{type}\hlstd{=}\hlstr{'l'}\hlstd{,} \hlkwc{main}\hlstd{=}\hlstr{'Residuals'}\hlstd{)}
-\hlkwd{plot}\hlstd{(results[,}\hlnum{23}\hlstd{],} \hlkwc{main}\hlstd{=}\hlstr{'Ljung-Box'}\hlstd{)}
-\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
-\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
+\hlkwd{plot}\hlstd{(}\hlkwd{all_box}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{main}\hlstd{=}\hlstr{'Ljung-Box'}\hlstd{)}
+\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
+\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-51-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-43-1} 
 
 \end{knitrout}
             \end{figure}
 
             Tanto o gráfico dos resíduos quanto os gráficos das funções de autocorrelação e autocorrelação parcial indicam que os resíduos do teste se comportam como ruído branco. Os p-valores do teste de Ljung-Box não rejeitam a hipótese de independência dos resíduos.
 
-            Agora, visualizamos o sumário do teste.
-
+            Agora, visualizamos as estatísticas do teste e os valores críticos        
+            
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{summary}\hlstd{(adf)}
+\hlstd{adf}\hlopt{@}\hlkwc{teststat}
 \end{alltt}
 \begin{verbatim}
-## 
-## ############################################### 
-## # Augmented Dickey-Fuller Test Unit Root Test # 
-## ############################################### 
-## 
-## Test regression none 
-## 
-## 
-## Call:
-## lm(formula = z.diff ~ z.lag.1 - 1 + z.diff.lag)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -0.22188 -0.05360 -0.00105  0.05312  0.43487 
-## 
-## Coefficients:
-##              Estimate Std. Error t value Pr(>|t|)    
-## z.lag.1      -1.42558    0.27895  -5.111 4.90e-07 ***
-## z.diff.lag1   0.17388    0.27409   0.634 0.526170    
-## z.diff.lag2  -0.02840    0.26795  -0.106 0.915656    
-## z.diff.lag3  -0.13271    0.26169  -0.507 0.612327    
-## z.diff.lag4  -0.07700    0.25629  -0.300 0.763987    
-## z.diff.lag5  -0.02814    0.25109  -0.112 0.910805    
-## z.diff.lag6   0.07834    0.24538   0.319 0.749681    
-## z.diff.lag7   0.18963    0.23904   0.793 0.428057    
-## z.diff.lag8   0.20060    0.23263   0.862 0.389015    
-## z.diff.lag9   0.27072    0.22598   1.198 0.231590    
-## z.diff.lag10  0.40889    0.21970   1.861 0.063433 .  
-## z.diff.lag11  0.49504    0.21314   2.323 0.020681 *  
-## z.diff.lag12  0.37274    0.20730   1.798 0.072884 .  
-## z.diff.lag13  0.35967    0.20260   1.775 0.076576 .  
-## z.diff.lag14  0.39096    0.19667   1.988 0.047473 *  
-## z.diff.lag15  0.34434    0.18902   1.822 0.069218 .  
-## z.diff.lag16  0.36352    0.17944   2.026 0.043414 *  
-## z.diff.lag17  0.35626    0.16889   2.109 0.035497 *  
-## z.diff.lag18  0.42467    0.15598   2.723 0.006748 ** 
-## z.diff.lag19  0.45444    0.13990   3.248 0.001254 ** 
-## z.diff.lag20  0.37292    0.12147   3.070 0.002280 ** 
-## z.diff.lag21  0.29879    0.09860   3.030 0.002593 ** 
-## z.diff.lag22  0.24201    0.07265   3.331 0.000941 ***
-## z.diff.lag23  0.25544    0.04474   5.709 2.16e-08 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## Residual standard error: 0.08436 on 418 degrees of freedom
-## Multiple R-squared:  0.6836,	Adjusted R-squared:  0.6654 
-## F-statistic: 37.62 on 24 and 418 DF,  p-value: < 2.2e-16
-## 
-## 
-## Value of test-statistic is: -5.1105 
-## 
-## Critical values for test statistics: 
+##              tau1
+## statistic -5.1105
+\end{verbatim}
+\begin{alltt}
+\hlstd{adf}\hlopt{@}\hlkwc{cval}
+\end{alltt}
+\begin{verbatim}
 ##       1pct  5pct 10pct
 ## tau1 -2.58 -1.95 -1.62
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
             
-            O valor da estatística do teste é de -5,1105. Os valores críticos para o teste são de -2,58 (1\%), -1,95 (5\%) e -1,62 (10\%). Sendo assim, o valor do teste ultrapassou os valores críticos para todos os graus de significância. O teste então rejeita a hipótese nula de presença de raiz unitária. O resultado obtido é, então, que a série temporal original é integrada de ordem um - I(1).
+            O valor da estatística do teste é de -5,1105. Os valores críticos para o teste são de -2,58 (1\%), -1,95 (5\%) e -1,62 (10\%). Sendo assim, o valor do teste ultrapassou os valores críticos para todos os graus de significância. O teste aponta que não há evidências suficientes de presença de raíz unitária. Portanto, consideramos a série estacionária após a primeira diferenciação. O resultado obtido é, então, que a série temporal original é integrada de ordem 1 - I(1).
+            
+        \subsubsection{Diferença Sazonal}
+    
+            A função de autocorrelação indica que existem lags sazonais significativos, no entando, o decaimento é rápido, indicanco não existência de raiz unitária sazonal.Testamos a seguir a hipótese nula de não presença de raiz unitária sazonal com o teste de Canova e Hansen (\cite{ch}).
+          
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{ch} \hlkwb{=} \hlkwd{ch.test}\hlstd{(}\hlkwd{ts}\hlstd{(}\hlkwd{na.omit}\hlstd{(data1}\hlopt{$}\hlstd{Diff),} \hlkwc{frequency}\hlstd{=}\hlnum{12}\hlstd{),} \hlkwc{type}\hlstd{=}\hlstr{"dummy"}\hlstd{,} \hlkwc{sid}\hlstd{=}\hlkwd{c}\hlstd{(}\hlnum{1}\hlopt{:}\hlnum{12}\hlstd{))}
+\hlstd{ch}\hlopt{$}\hlstd{pvalues}
+\end{alltt}
+\begin{verbatim}
+## [1] 0.5464967
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+            O teste retornou um p-valor de 0.5465, o que significa que não podemos rejeitar a hipótese nula de não presença de raiz unitária sazonal.
 
 
     \subsection{Identificação das Possíveis Formas Funcionais}
@@ -985,15 +879,16 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(}\hlkwd{na.omit}\hlstd{(data1}\hlopt{$}\hlstd{Diff)),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
+\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(}\hlkwd{na.omit}\hlstd{(data1}\hlopt{$}\hlstd{Diff)),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-53-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-46-1} 
 
 \end{knitrout}
         \end{figure}
         
-        A função de autocorrelação tem até o segundo lag significativo, enquanto mostra um lag significativo no fator sazonal.
+        A função de autocorrelação trunca após o segundo lag. Como mencionado anteriormente, a FAC da série da primeira diferença mostra que há decaimento rápido do padrão de sazonalidade (múltiplo de 12) a partir do lag número 24.
+        
         
         \begin{figure}[H]
         \caption{FACP da Primeira Diferença}
@@ -1001,205 +896,80 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(}\hlkwd{na.omit}\hlstd{(data1}\hlopt{$}\hlstd{Diff)),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
+\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(}\hlkwd{na.omit}\hlstd{(data1}\hlopt{$}\hlstd{Diff)),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-54-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-47-1} 
 
 \end{knitrout}
         \end{figure}
 
-        A função de autocorrelação parcial tem até o terceiro lag significativo, enquanto mostra dois lags significativos no fator sazonal.
+        A função de autocorrelação parcial tem até o terceiro lag significativo, enquanto mostra três lags significativos no fator sazonal.
         
-        A análise das funções acima sugere que uma ordem máxima para o modelo SARIMA é (2,1,3)(1,0,2)12.
+        A análise das funções acima sugere que uma ordem máxima para o modelo SARIMA é (3,1,2)(3,0,2)12.
 
 
     \subsection{Estimação}
     
-        Na subseção anterior definimos as ordems máximas do modelo SARIMA. Nesta seção vamos estimar todos os modelos até as ordens máximas, testar seus resíduos para checar se comportam-se como ruído branco e, finalmente, escolher o modelo que passa o teste dos resíduos que apresente melhor critério de informação.
-        
-        Primeiramente, estimamaos todos os modelos até as ordens máximas (72 modelos) e realizamos os testes de Ljung-Box.
-        
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{ps} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{)}
-\hlstd{qs} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{)}
-\hlstd{Ps} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{)}
-\hlstd{Qs} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{)}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
+        Na subseção anterior definimos as ordems máximas do modelo SARIMA. Nesta seção vamos estimar todos os modelos até as ordens máximas, testar seus resíduos para checar se comportam-se como ruído branco e, finalmente, escolher os modelos que passam o teste dos resíduos que apresente melhores critério de informação (AIC e BIC). Esses passos são realizados no \textit{chunk} abaixo.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{results} \hlkwb{<-} \hlkwd{matrix}\hlstd{(}\hlkwc{ncol}\hlstd{=}\hlnum{72}\hlstd{,}\hlkwc{nrow}\hlstd{=}\hlnum{25}\hlstd{)}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{72}\hlstd{)\{}
-    \hlstd{model} \hlkwb{<-} \hlkwd{sarima}\hlstd{(data1}\hlopt{$}\hlstd{Value,}
-                    \hlstd{ps[i],} \hlnum{1}\hlstd{, qs[i],}
-                    \hlstd{Ps[i],} \hlnum{0}\hlstd{, Qs[i],} \hlnum{12}\hlstd{)}
-    \hlkwa{for} \hlstd{(e} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{25}\hlstd{)\{}
-      \hlstd{box} \hlkwb{<-} \hlkwd{Box.test}\hlstd{(model}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals,}\hlkwc{lag}\hlstd{=e)}
-      \hlstd{results[e,i]} \hlkwb{<-} \hlstd{box}\hlopt{$}\hlstd{p.value}
-    \hlstd{\}}
-\hlstd{\}}
+\hlstd{order} \hlkwb{<-} \hlkwd{select_model}\hlstd{(data1}\hlopt{$}\hlstd{Value,}\hlnum{3}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{12}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
-
-        Em segundo lugar, escolhemos os modelos que passam no teste de Ljung-Box.
+    
+        Abaixo, as ordens dos melhores modelos pelos critérios AIC e BIC.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{models} \hlkwb{<-} \hlkwd{c}\hlstd{()}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{72}\hlstd{)\{}
-    \hlkwa{if} \hlstd{(}\hlkwd{min}\hlstd{(results[,i])} \hlopt{>} \hlnum{.05}\hlstd{)\{}
-      \hlstd{models} \hlkwb{<-} \hlkwd{append}\hlstd{(models, i)}
-    \hlstd{\}}
-\hlstd{\}}
-\hlstd{models}
+\hlcom{# Ordem pelo critério AIC}
+\hlkwd{print}\hlstd{(}\hlstr{"p q P Q"}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-## [1]  2  4 14 16 26 28
-\end{verbatim}
-\end{kframe}
-\end{knitrout}
-            
-            
-        Como podemos ver, apenas seis modelos apresentam resíduos com comportamento de ruído branco. Os estimamos novamente para avaliar o critério de informação.
-            
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{aics} \hlkwb{<-} \hlkwd{c}\hlstd{()}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlstd{models)\{}
-    \hlstd{model} \hlkwb{<-} \hlkwd{sarima}\hlstd{(data1}\hlopt{$}\hlstd{Value,}
-                    \hlstd{ps[i],} \hlnum{1}\hlstd{, qs[i],}
-                    \hlstd{Ps[i],} \hlnum{0}\hlstd{, Qs[i],} \hlnum{12}\hlstd{)}
-    \hlstd{aics} \hlkwb{<-} \hlkwd{append}\hlstd{(aics, model}\hlopt{$}\hlstd{AIC)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
-
-        Abaixo, os critérios de informação de cada modelo.
-
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{models}
-\end{alltt}
-\begin{verbatim}
-## [1]  2  4 14 16 26 28
+## [1] "p q P Q"
 \end{verbatim}
 \begin{alltt}
-\hlstd{aics}
+\hlstd{order[,}\hlnum{1}\hlstd{]}
 \end{alltt}
 \begin{verbatim}
-## [1] -2.029506 -2.032146 -2.029555 -2.031749 -2.004273 -2.012301
+## [1] 2 2 1 2
+\end{verbatim}
+\begin{alltt}
+\hlcom{# Ordem pelo critério BIC}
+\hlkwd{print}\hlstd{(}\hlstr{"p q P Q"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## [1] "p q P Q"
+\end{verbatim}
+\begin{alltt}
+\hlstd{order[,}\hlnum{2}\hlstd{]}
+\end{alltt}
+\begin{verbatim}
+## [1] 2 2 0 2
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
 
-        Escolhemos, então, o modelo com menor critério de informação.
-
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{ind} \hlkwb{<-} \hlkwd{which.min}\hlstd{(aics)}
-\hlstd{mod} \hlkwb{<-} \hlstd{models[ind]}
-\hlstd{ps[mod]}
-\end{alltt}
-\begin{verbatim}
-## [1] 2
-\end{verbatim}
-\begin{alltt}
-\hlstd{qs[mod]}
-\end{alltt}
-\begin{verbatim}
-## [1] 2
-\end{verbatim}
-\begin{alltt}
-\hlstd{Ps[mod]}
-\end{alltt}
-\begin{verbatim}
-## [1] 1
-\end{verbatim}
-\begin{alltt}
-\hlstd{Qs[mod]}
-\end{alltt}
-\begin{verbatim}
-## [1] 2
-\end{verbatim}
-\end{kframe}
-\end{knitrout}
-
-        O modelo com melhor critério de informação é o segundo, que corresponde ao 4 na lista dos 72 modelos, que é o SARIMA (2,1,2)(1,0,2)12. Estimamos então novamente esse modelo.
+        O modelo com melhor critério AIC é o SARIMA (2,1,2)(1,0,2)12, e o com melhor critério BIC é o SARIMA(2,1,2)(0,0,2)12. Pelo princípio da parcimônia, optamos pelo modelo mais simples (menos parâmetros), que apresenta menor critério BIC.
             
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{model1} \hlkwb{<-} \hlkwd{sarima}\hlstd{(data1}\hlopt{$}\hlstd{Value,}
-                \hlnum{2}\hlstd{,} \hlnum{1}\hlstd{,} \hlnum{2}\hlstd{,}
-                \hlnum{1}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{2}\hlstd{,} \hlnum{12}\hlstd{)}
+                 \hlnum{2}\hlstd{,} \hlnum{1}\hlstd{,} \hlnum{2}\hlstd{,}
+                 \hlnum{0}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{2}\hlstd{,} \hlnum{12}\hlstd{)}
 \end{alltt}
-\end{kframe}
-\end{knitrout}
-
-        Abaixo, o sumário do modelo.
-        
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{print}\hlstd{(model1)}
-\end{alltt}
-\begin{verbatim}
-## $fit
-## 
-## Call:
-## stats::arima(x = xdata, order = c(p, d, q), seasonal = list(order = c(P, D, 
-##     Q), period = S), xreg = constant, transform.pars = trans, fixed = fixed, 
-##     optim.control = list(trace = trc, REPORT = 1, reltol = tol))
-## 
-## Coefficients:
-##          ar1      ar2      ma1     ma2     sar1     sma1     sma2  constant
-##       1.4362  -0.4843  -1.7137  0.7823  -0.2753  -0.0223  -0.3761    0.0005
-## s.e.  0.1221   0.1340   0.0960  0.1061   0.1809   0.1706   0.0742    0.0027
-## 
-## sigma^2 estimated as 0.007315:  log likelihood = 482.49,  aic = -946.98
-## 
-## $degrees_of_freedom
-## [1] 458
-## 
-## $ttable
-##          Estimate     SE  t.value p.value
-## ar1        1.4362 0.1221  11.7620  0.0000
-## ar2       -0.4843 0.1340  -3.6154  0.0003
-## ma1       -1.7137 0.0960 -17.8433  0.0000
-## ma2        0.7823 0.1061   7.3758  0.0000
-## sar1      -0.2753 0.1809  -1.5216  0.1288
-## sma1      -0.0223 0.1706  -0.1305  0.8962
-## sma2      -0.3761 0.0742  -5.0678  0.0000
-## constant   0.0005 0.0027   0.1882  0.8508
-## 
-## $AIC
-## [1] -2.032146
-## 
-## $AICc
-## [1] -2.03147
-## 
-## $BIC
-## [1] -1.952108
-\end{verbatim}
 \end{kframe}
 \end{knitrout}
 
 
     \subsection{Diagnóstico dos Resíduos}
     
-        Nesta seção iremos fazer o diagnóstico dos resíduos. Para isso vamos analisar sua independência, homoscedasticidade e distribuição.
+        Nesta seção iremos fazer o diagnóstico dos resíduos. Para isso vamos analisar sua independência e homoscedasticidade.
         
         \subsubsection{Independência}
         
@@ -1214,7 +984,7 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{plot}\hlstd{(model1}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-60-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-49-1} 
 
 \end{knitrout}
             \end{figure}
@@ -1228,7 +998,7 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(model1}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-61-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-50-1} 
 
 \end{knitrout}
             \end{figure}
@@ -1242,21 +1012,17 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(model1}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-62-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-51-1} 
 
 \end{knitrout}
             \end{figure}
             
-            Tanto o gráfico dos resíduos quanto a sua função de autocorrelação e sua função de autocorrelação parcial indicam que os resíduos se comportam como ruído branco. Para testar essa hipótese, realizamos o teste de Ljung-Box para todos os lags até o vinte e cinco. Os testes são realizados no \textit{chunk} abaixo, e na figura abaixo estão os p-valores dos testes para cada lag.
+            Tanto o gráfico dos resíduos quanto a sua função de autocorrelação e sua função de autocorrelação parcial indicam que os resíduos se comportam como ruído branco, já que a quantidade de lags significativos é a esperada para um nível de significância de 5\%. o Para testar essa hipótese, realizamos o teste de Ljung-Box para todos os lags até o vinte e cinco. Os testes são realizados no \textit{chunk} abaixo, e na figura abaixo estão os p-valores dos testes para cada lag.
             
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{boxs} \hlkwb{<-} \hlkwd{matrix}\hlstd{(}\hlkwc{nrow}\hlstd{=}\hlnum{25}\hlstd{,}\hlkwc{ncol}\hlstd{=}\hlnum{1}\hlstd{)}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{25}\hlstd{)\{}
-    \hlstd{box} \hlkwb{<-} \hlkwd{Box.test}\hlstd{(model1}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals,}\hlkwc{lag}\hlstd{=i)}
-    \hlstd{boxs[i]} \hlkwb{<-} \hlstd{box}\hlopt{$}\hlstd{p.value}
-\hlstd{\}}
+\hlstd{boxs} \hlkwb{<-} \hlkwd{all_box}\hlstd{(model1}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -1270,16 +1036,29 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{plot}\hlstd{(boxs,} \hlkwc{type}\hlstd{=}\hlstr{'l'}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-64-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-53-1} 
 
 \end{knitrout}
             \end{figure}
             
-            Os p-valores não rejeitam a hipótese nula de independência da distribuição.
+            Abaixo, o valor mínimo do teste de Ljung-Box entre todos os lags considerados.
+            
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{min}\hlstd{(boxs)}
+\end{alltt}
+\begin{verbatim}
+## [1] 0.7166852
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+            
+            Os p-valores não rejeitam a hipótese nula de independência da distribuição, uma vez que todos são superiores a 0,05.
             
         \subsubsection{Homoscedasticidade}
         
-            Testamos a homoscedasticidade dos resíduos apicando a análise acima no resíduo ao quadrado.
+            Testamos a homoscedasticidade dos resíduos do modelo selecionado apicando a análise acima nos resíduos ao quadrado.
             
             \begin{figure}[H]
             \caption{Resíduos ao Quadrado}
@@ -1290,7 +1069,7 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{plot}\hlstd{(model1}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals}\hlopt{^}\hlnum{2}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-65-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-55-1} 
 
 \end{knitrout}
             \end{figure}
@@ -1304,7 +1083,7 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(model1}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals)}\hlopt{^}\hlnum{2}\hlstd{,} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-66-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-56-1} 
 
 \end{knitrout}
             \end{figure}
@@ -1318,21 +1097,17 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(model1}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals)}\hlopt{^}\hlnum{2}\hlstd{,} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-67-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-57-1} 
 
 \end{knitrout}
             \end{figure}
             
-            Tanto o gráfico dos resíduos ao quadrado quanto a sua função de autocorrelação e sua função de autocorrelação parcial indicam homoscedasticidade. Para testar essa hipótese, realizamos o teste de Ljung-Box nos rsíduos ao quadrado para todos os lags até o vinte e cinco. Os testes são realizados no \textit{chunk} abaixo, e na figura abaixo estão os p-valores dos testes para cada lag.
+            Tanto o gráfico dos resíduos ao quadrado quanto a sua função de autocorrelação e sua função de autocorrelação parcial indicam homoscedasticidade. Para testar essa hipótese, realizamos o teste de Ljung-Box nos resíduos ao quadrado para todos os lags até o vinte e cinco. Os testes são realizados no \textit{chunk} abaixo, e na figura abaixo estão os p-valores dos testes para cada lag.
             
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{boxs} \hlkwb{<-} \hlkwd{matrix}\hlstd{(}\hlkwc{nrow}\hlstd{=}\hlnum{25}\hlstd{,}\hlkwc{ncol}\hlstd{=}\hlnum{1}\hlstd{)}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{25}\hlstd{)\{}
-    \hlstd{box} \hlkwb{<-} \hlkwd{Box.test}\hlstd{(model1}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals}\hlopt{^}\hlnum{2}\hlstd{,}\hlkwc{lag}\hlstd{=i)}
-    \hlstd{boxs[i]} \hlkwb{<-} \hlstd{box}\hlopt{$}\hlstd{p.value}
-\hlstd{\}}
+\hlstd{boxs} \hlkwb{<-} \hlkwd{all_box}\hlstd{(model1}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals}\hlopt{^}\hlnum{2}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -1346,33 +1121,25 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{plot}\hlstd{(boxs,} \hlkwc{type}\hlstd{=}\hlstr{'l'}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-69-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-59-1} 
 
 \end{knitrout}
             \end{figure}
             
-            Os p-valores não rejeitam a hipótese nula de independência da distribuição. Os resíduos podem ser considerados então homoscedásticos, pois os resíduos ao quadrado são `bem comportados' (ruído branco). Não é necessário então estimar um modelo de variância condicional.
-            
-        \subsubsection{Normalidade}
-        
-            Para testar a normalidade dos resíduos aplicamos o teste de Shapiro-Wilk (\cite{shapirowilk}).
+        Abaixo, o valor mínimo do teste de Ljung-Box entre todos os lags considerados.
             
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{shapiro.test}\hlstd{(model1}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals)}
+\hlkwd{min}\hlstd{(boxs)}
 \end{alltt}
 \begin{verbatim}
-## 
-## 	Shapiro-Wilk normality test
-## 
-## data:  model1$fit$residuals
-## W = 0.98772, p-value = 0.0005713
+## [1] 0.1300694
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
-
-            O teste rejeita a hipótese nula de normalidade dos resíduos.
+            
+            Os p-valores não rejeitam a hipótese nula de independência da distribuição. Os resíduos podem ser considerados então homoscedásticos, pois os resíduos ao quadrado são `bem comportados' (ruído branco). Não é necessário então estimar um modelo de variância condicional.
 
 
     \subsection{Previsão e Acurácia}
@@ -1381,20 +1148,12 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
     
         \subsubsection{Previsão}
         
-            Agora, realizaremos previsões para os últimos 20 períodos da amostra. Faremos previsão recursiva, ou seja: prevemos sempre apenas o período imediatamente subsequente, utilizando todos os dados até então.
-        
+            Agora, realizaremos previsões para os últimos 10 períodos da amostra. Faremos previsão \textit{rolling window}, ou seja: prevemos sempre apenas o período imediatamente subsequente, utilizando a mesma quantidade de dados para todas as previsões.
+
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{fs} \hlkwb{<-} \hlkwd{c}\hlstd{()}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{20}\hlopt{:}\hlnum{1}\hlstd{)\{}
-    \hlstd{until}      \hlkwb{<-} \hlkwd{length}\hlstd{(data1}\hlopt{$}\hlstd{Value)}\hlopt{-}\hlstd{i}
-    \hlstd{data}       \hlkwb{<-} \hlstd{data1}\hlopt{$}\hlstd{Value[}\hlnum{1}\hlopt{:}\hlstd{until]}
-    \hlstd{prediction} \hlkwb{<-} \hlkwd{sarima.for}\hlstd{(data,} \hlnum{1}\hlstd{,}
-                           \hlnum{2}\hlstd{,} \hlnum{1}\hlstd{,} \hlnum{2}\hlstd{,}
-                           \hlnum{1}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{2}\hlstd{,} \hlnum{12}\hlstd{)}
-    \hlstd{fs} \hlkwb{<-} \hlkwd{append}\hlstd{(fs, prediction}\hlopt{$}\hlstd{pred)}
-\hlstd{\}}
+\hlstd{fs} \hlkwb{<-} \hlkwd{prediction}\hlstd{(data1}\hlopt{$}\hlstd{Value,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -1407,9 +1166,8 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlstd{fs}
 \end{alltt}
 \begin{verbatim}
-##  [1] 2.082725 2.088396 2.067254 2.105981 2.123054 2.149433 2.186097 2.227275
-##  [9] 2.284345 2.290782 2.295716 2.247239 2.325614 2.314883 2.473123 2.503603
-## [17] 2.489219 2.508543 2.627183 2.643718
+##  [1] 2.299853 2.082237 2.104396 2.016007 2.085035 2.235921 2.363979 2.474957
+##  [9] 2.802898 2.917021
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -1423,14 +1181,14 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{length} \hlkwb{<-} \hlkwd{length}\hlstd{(data1}\hlopt{$}\hlstd{Value)}
-\hlstd{start}  \hlkwb{<-} \hlstd{length} \hlopt{-} \hlnum{19}
+\hlstd{start}  \hlkwb{<-} \hlstd{length} \hlopt{-} \hlnum{9}
 \hlstd{series} \hlkwb{<-} \hlstd{data1}\hlopt{$}\hlstd{Value[start}\hlopt{:}\hlstd{length]}
 \hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{))}
 \hlkwd{plot}\hlstd{(fs,}\hlkwc{type}\hlstd{=}\hlstr{'l'}\hlstd{,} \hlkwc{main}\hlstd{=}\hlstr{'Previsões'}\hlstd{)}
 \hlkwd{plot}\hlstd{(series)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-72-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-62-1} 
 
 \end{knitrout}
             \end{figure}
@@ -1445,8 +1203,8 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{accuracy}\hlstd{(fs,}\hlkwd{as.matrix}\hlstd{(series))}
 \end{alltt}
 \begin{verbatim}
-##                  ME       RMSE        MAE     MPE     MAPE
-## Test set 0.03829089 0.05968404 0.04181064 1.58768 1.741936
+##                 ME      RMSE       MAE      MPE     MAPE
+## Test set 0.1517694 0.2556732 0.2157534 6.290162 8.659937
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -1459,17 +1217,17 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{TheilU}\hlstd{(series,fs)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.02542164
+## [1] 0.1025074
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
         
-          O índice do teste foi de 0,02542164, menor que 1. O modelo fez previsões melhores que uma simples adivinhação.
+          O índice do teste foi de 0,102, menor que 1. O modelo fez previsões melhores que uma simples adivinhação.
         
 
 
 
-\section{Segunda Série Temporal}
+\section{Segunda Parte da Série Temporal}
 
     \subsection{Definição da Ordem de Integração}
     
@@ -1488,12 +1246,12 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{plot}\hlstd{(data2)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-75-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-65-1} 
 
 \end{knitrout}
             \end{figure}
             
-            A visualização da série temporal indica presença de raiz unitária. Para coletar mais indícios visuais analisamos abaixo a função de autocorrelação.
+            O gráfico assemelha-se a um passeio aleatório, portanto, indicandio a presença de raíz unitária. Para coletar mais indícios visuais analisamos abaixo a função de autocorrelação e a fução de autocorrelação parcial.
             
             \begin{figure}[H]
             \caption{FAC da Série Temporal}
@@ -1501,10 +1259,10 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(data2),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
+\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(data2),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-76-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-66-1} 
 
 \end{knitrout}
             \end{figure}
@@ -1515,108 +1273,34 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(data2),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
+\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(data2),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-77-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-67-1} 
 
 \end{knitrout}
             \end{figure}
             
-            A função de autocorrelação aparentemente possui decaimento linear, indicando possibilidade de raiz unitária. Para testar a hipótese de presença de raiz unitária com o teste Dickey-Fuller aumentado (\cite{adf}). O teste será realizado com \textit{drift}, pois a visualização do gráfico da série temporal indica a presença de tal. Para escolher o lag do teste, começaremos pelo lag 1 e, caso os resíduos do teste forem ruído branco, aceitamos o lag. Caso os resíduos não apresentarem comportamento de ruído branco, repetimos os passos com o lag imediatamente maior. No \textit{chunk} abaixo realizamos testes ADF para 24 lags, e para cada teste testamos os resíduos com testes de Ljung-Box (\cite{ljungbox}) até 25 lags.
+            A função de autocorrelação aparentemente possui decaimento lento, indicando possibilidade de raiz unitária. Para testar a hipótese de presença de raiz unitária com o teste Dickey-Fuller aumentado (\cite{adf}). O teste será realizado sem \textit{drift} ou tendência, pois a visualização do gráfico da série temporal não indica a presença de tais. Para escolher o lag do teste, começaremos pelo lag 1 e, caso os resíduos do teste forem ruído branco, aceitamos o lag. Caso os resíduos não apresentarem comportamento de ruído branco, repetimos os passos com o lag imediatamente maior. No \textit{chunk} abaixo realizamos testes ADF para 24 lags, e para cada teste testamos os resíduos com testes de Ljung-Box (\cite{ljungbox}) até 25 lags.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{results} \hlkwb{<-} \hlkwd{matrix}\hlstd{(,}\hlkwc{nrow}\hlstd{=}\hlnum{25}\hlstd{,}\hlkwc{ncol}\hlstd{=}\hlnum{24}\hlstd{)}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{24}\hlstd{)\{}
-  \hlstd{adf} \hlkwb{<-} \hlkwd{ur.df}\hlstd{(data2}\hlopt{$}\hlstd{Value,} \hlkwc{type}\hlstd{=}\hlstr{'drift'}\hlstd{,} \hlkwc{lags}\hlstd{=i)}
-  \hlkwa{for} \hlstd{(e} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{25}\hlstd{)\{}
-    \hlstd{box} \hlkwb{<-} \hlkwd{Box.test}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{,}\hlkwc{lag}\hlstd{=e)}
-    \hlstd{results[e,i]} \hlkwb{<-} \hlstd{box}\hlopt{$}\hlstd{p.value}
-  \hlstd{\}}
-\hlstd{\}}
+\hlstd{lag} \hlkwb{<-} \hlkwd{select_adf}\hlstd{(data2}\hlopt{$}\hlstd{Value,} \hlstr{"none"}\hlstd{)}
+\hlstd{lag}
 \end{alltt}
+\begin{verbatim}
+## [1] 14
+\end{verbatim}
 \end{kframe}
 \end{knitrout}
 
+            Escolhemos a ordem de lag 14.
 
-            Nas figuras abaixo encontram-se os resultados dos testes de Ljung-Box para os resíduos de cada um dos testes de Dickey-Fuller aumentados.
-
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 1 a 6}
-            \centering
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{))}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{6}\hlstd{)\{}
-  \hlkwd{plot}\hlstd{(results[,i],} \hlkwc{main}\hlstd{=i)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-79-1} 
-
-\end{knitrout}
-            \end{figure}
-            
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 7 a 12}
-            \centering
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{))}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{7}\hlopt{:}\hlnum{12}\hlstd{)\{}
-  \hlkwd{plot}\hlstd{(results[,i],} \hlkwc{main}\hlstd{=i)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-80-1} 
-
-\end{knitrout}
-            \end{figure}
-            
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 13 a 18}
-            \centering
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{))}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{13}\hlopt{:}\hlnum{18}\hlstd{)\{}
-  \hlkwd{plot}\hlstd{(results[,i],} \hlkwc{main}\hlstd{=i)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-81-1} 
-
-\end{knitrout}
-            \end{figure}
-
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 19 a 24}
-            \centering
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{))}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{19}\hlopt{:}\hlnum{24}\hlstd{)\{}
-  \hlkwd{plot}\hlstd{(results[,i],} \hlkwc{main}\hlstd{=i)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-82-1} 
-
-\end{knitrout}
-            \end{figure}
-            
-            Nos gráficos acima podemos ver que a única ordem de lags que gera resíduos que são ruído branco é a ordem 17, então realizamos o teste com essa ordem e apresentamos os gráficos dos resíduos e dos testes nos resíduos.
-            
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{adf} \hlkwb{<-} \hlkwd{ur.df}\hlstd{(}\hlkwd{na.omit}\hlstd{(data1}\hlopt{$}\hlstd{Diff),} \hlkwc{lags}\hlstd{=}\hlnum{17}\hlstd{)}
+\hlstd{adf} \hlkwb{<-} \hlkwd{ur.df}\hlstd{(}\hlkwd{na.omit}\hlstd{(data2}\hlopt{$}\hlstd{Value),} \hlstr{"none"}\hlstd{,} \hlkwc{lags}\hlstd{=lag)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -1629,78 +1313,40 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \begin{alltt}
 \hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{))}
 \hlkwd{plot}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{,} \hlkwc{type}\hlstd{=}\hlstr{'l'}\hlstd{,} \hlkwc{main}\hlstd{=}\hlstr{'Residuals'}\hlstd{)}
-\hlkwd{plot}\hlstd{(results[,}\hlnum{17}\hlstd{],} \hlkwc{main}\hlstd{=}\hlstr{'Ljung-Box'}\hlstd{)}
-\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
-\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
+\hlkwd{plot}\hlstd{(}\hlkwd{all_box}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{main}\hlstd{=}\hlstr{'Ljung-Box'}\hlstd{)}
+\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
+\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-84-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-70-1} 
 
 \end{knitrout}
             \end{figure}
 
             Tanto o gráfico dos resíduos quanto os gráficos das funções de autocorrelação e autocorrelação parcial indicam que os resíduos do teste se comportam como ruído branco. Os p-valores do teste de Ljung-Box não rejeitam a hipótese de independência dos resíduos.
-            Agora, apresentamos o sumário do teste.
+            
+            Agora, visualizamos as estatísticas do teste e os valores críticos        
             
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{summary}\hlstd{(adf)}
+\hlstd{adf}\hlopt{@}\hlkwc{teststat}
 \end{alltt}
 \begin{verbatim}
-## 
-## ############################################### 
-## # Augmented Dickey-Fuller Test Unit Root Test # 
-## ############################################### 
-## 
-## Test regression none 
-## 
-## 
-## Call:
-## lm(formula = z.diff ~ z.lag.1 - 1 + z.diff.lag)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -0.26414 -0.05624  0.00072  0.05925  0.45708 
-## 
-## Coefficients:
-##              Estimate Std. Error t value Pr(>|t|)    
-## z.lag.1      -1.13700    0.25139  -4.523  7.9e-06 ***
-## z.diff.lag1  -0.14668    0.24511  -0.598   0.5499    
-## z.diff.lag2  -0.37154    0.23879  -1.556   0.1205    
-## z.diff.lag3  -0.46688    0.23261  -2.007   0.0454 *  
-## z.diff.lag4  -0.39939    0.22732  -1.757   0.0796 .  
-## z.diff.lag5  -0.36377    0.22132  -1.644   0.1010    
-## z.diff.lag6  -0.26499    0.21563  -1.229   0.2198    
-## z.diff.lag7  -0.16782    0.21082  -0.796   0.4265    
-## z.diff.lag8  -0.14821    0.20483  -0.724   0.4697    
-## z.diff.lag9  -0.03067    0.19716  -0.156   0.8765    
-## z.diff.lag10  0.09369    0.18732   0.500   0.6172    
-## z.diff.lag11  0.18400    0.17636   1.043   0.2974    
-## z.diff.lag12  0.08676    0.16318   0.532   0.5952    
-## z.diff.lag13  0.04422    0.14647   0.302   0.7629    
-## z.diff.lag14  0.05164    0.12688   0.407   0.6842    
-## z.diff.lag15 -0.02298    0.10257  -0.224   0.8228    
-## z.diff.lag16 -0.02397    0.07521  -0.319   0.7501    
-## z.diff.lag17 -0.04025    0.04625  -0.870   0.3847    
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## Residual standard error: 0.08864 on 430 degrees of freedom
-## Multiple R-squared:  0.6542,	Adjusted R-squared:  0.6397 
-## F-statistic:  45.2 on 18 and 430 DF,  p-value: < 2.2e-16
-## 
-## 
-## Value of test-statistic is: -4.5229 
-## 
-## Critical values for test statistics: 
+##                 tau1
+## statistic -0.2342756
+\end{verbatim}
+\begin{alltt}
+\hlstd{adf}\hlopt{@}\hlkwc{cval}
+\end{alltt}
+\begin{verbatim}
 ##       1pct  5pct 10pct
 ## tau1 -2.58 -1.95 -1.62
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
 
-            O valor da estatística do teste é de -2,2007. Os valores críticos para o teste são de -3,44 (1\%), -2,87 (5\%) e -2,57 (10\%). Sendo assim, o valor do teste não ultrapassou os valores críticos para nenhum grau de significância. O teste então aceita a hipótese nula de presença de raiz unitária.
+            O valor da estatística do teste é de -0.2343. Os valores críticos para o teste são de -2,58 (1\%), -1,95 (5\%) e -1,62 (10\%). Sendo assim, o valor do teste não ultrapassou os valores críticos para nenhum grau de significância. O teste então aceita a hipótese nula de presença de raiz unitária.
 
         \subsubsection{Diferenciação}
         
@@ -1747,12 +1393,12 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{plot}\hlstd{(data2}\hlopt{$}\hlstd{Diff)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-88-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-74-1} 
 
 \end{knitrout}
             \end{figure}
             
-            A visualização da série temporal não indica presença de raiz unitária. Para coletar mais indícios visuais analisamos abaixo a função de autocorrelação.
+            A analise visual do gráfico sugere variação em torno de uma média sem distanciamento grande por longos períodos, portanto, indica que a estacionariedade da série foi obtida na primeira diferenciação.
             
             \begin{figure}[H]
             \caption{FAC da Primeira Diferença}
@@ -1760,10 +1406,10 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(}\hlkwd{na.omit}\hlstd{(data2}\hlopt{$}\hlstd{Diff)),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
+\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(}\hlkwd{na.omit}\hlstd{(data2}\hlopt{$}\hlstd{Diff)),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-89-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-75-1} 
 
 \end{knitrout}
             \end{figure}
@@ -1774,134 +1420,34 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(}\hlkwd{na.omit}\hlstd{(data2}\hlopt{$}\hlstd{Diff)),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
+\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(}\hlkwd{na.omit}\hlstd{(data2}\hlopt{$}\hlstd{Diff)),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-90-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-76-1} 
 
 \end{knitrout}
             \end{figure}
             
-            A função de autocorrelação indica padrão sazonal, então pode ser que seja necessário diferenciar sazonalmente a série diferenciada para transforma-la em estacionária. Testamos a seguir a hipótese nula de não presença de raiz unitária sazonal com o teste de Canova e Hansen (\cite{ch}).
-          
+            A análise dos gráficos pós diferenciação indica rápido decaimento nas funções ACF e PACF, reforçando a hipótese de que não há raíz unitária. Agora testaremos, com o teste de Dickey-Fuller aumentado, a presença de raiz unitária. Não adicionaremos drift ou tendância no teste pois não há indício pelo gráfico da série de existência de algum desses parâmetros. Seguiremos os passos descritos acima, quando aplicamos o teste na série temporal original.
+            
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{ch} \hlkwb{=} \hlkwd{ch.test}\hlstd{(}\hlkwd{ts}\hlstd{(}\hlkwd{na.omit}\hlstd{(data2}\hlopt{$}\hlstd{Diff),} \hlkwc{frequency}\hlstd{=}\hlnum{12}\hlstd{),} \hlkwc{type}\hlstd{=}\hlstr{"dummy"}\hlstd{,} \hlkwc{sid}\hlstd{=}\hlkwd{c}\hlstd{(}\hlnum{1}\hlopt{:}\hlnum{12}\hlstd{))}
-\hlkwd{print}\hlstd{(ch)}
+\hlstd{lag} \hlkwb{<-} \hlkwd{select_adf}\hlstd{(}\hlkwd{na.omit}\hlstd{(data2}\hlopt{$}\hlstd{Diff),}\hlstr{"none"}\hlstd{)}
+\hlstd{lag}
 \end{alltt}
 \begin{verbatim}
-## 
-## 	Canova and Hansen test for seasonal stability
-## 
-## data:  ts(na.omit(data2$Diff), frequency = 12)
-## 
-##      statistic pvalue  
-## [1,]    1.1697 0.6117  
-## ---
-## Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
-## 
-## Test type: seasonal dummies 
-## NW covariance matrix lag order: 16 
-## First order lag: no 
-## Other regressors: no  
-## P-values: interpolation in original tables
+## [1] 13
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
 
-            O teste retornou um p-valor de 0.6317, o que significa que não podemos rejeitar a hipótese nula de não presença de raiz unitária sazonal.
-            Agora que sabemos que não existe raiz unitária sazonal, testaremos, com o teste de Dickey-Fuller aumentado, a presença de raiz unitária não sazonal. Desta vez não adicionamos \textit{drift} ao modelo, pois a visualização dos dados não sujere presença de \textit{drift}. Seguiremos os passos descritos acima, quando aplicamos o teste na série temporal original.
+            Escolhemos a ordem de lag 13.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{results} \hlkwb{<-} \hlkwd{matrix}\hlstd{(,}\hlkwc{nrow}\hlstd{=}\hlnum{25}\hlstd{,}\hlkwc{ncol}\hlstd{=}\hlnum{24}\hlstd{)}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{24}\hlstd{)\{}
-  \hlstd{adf} \hlkwb{<-} \hlkwd{ur.df}\hlstd{(}\hlkwd{na.omit}\hlstd{(data2}\hlopt{$}\hlstd{Diff),} \hlkwc{type}\hlstd{=}\hlstr{'drift'}\hlstd{,} \hlkwc{lags}\hlstd{=i)}
-  \hlkwa{for} \hlstd{(e} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{25}\hlstd{)\{}
-    \hlstd{box} \hlkwb{<-} \hlkwd{Box.test}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{,}\hlkwc{lag}\hlstd{=e)}
-    \hlstd{results[e,i]} \hlkwb{<-} \hlstd{box}\hlopt{$}\hlstd{p.value}
-  \hlstd{\}}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
-
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 1 a 6}
-            \centering
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{))}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{6}\hlstd{)\{}
-  \hlkwd{plot}\hlstd{(results[,i],} \hlkwc{main}\hlstd{=i)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-93-1} 
-
-\end{knitrout}
-            \end{figure}
-            
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 7 a 12}
-            \centering
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{))}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{7}\hlopt{:}\hlnum{12}\hlstd{)\{}
-  \hlkwd{plot}\hlstd{(results[,i],} \hlkwc{main}\hlstd{=i)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-94-1} 
-
-\end{knitrout}
-            \end{figure}
-            
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 13 a 18}
-            \centering
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{))}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{13}\hlopt{:}\hlnum{18}\hlstd{)\{}
-  \hlkwd{plot}\hlstd{(results[,i],} \hlkwc{main}\hlstd{=i)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-95-1} 
-
-\end{knitrout}
-            \end{figure}
-
-            \begin{figure}[H]
-            \caption{Resultados dos Testes de Ljung-Box para os Lags 19 a 24}
-            \centering
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{))}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{19}\hlopt{:}\hlnum{24}\hlstd{)\{}
-  \hlkwd{plot}\hlstd{(results[,i],} \hlkwc{main}\hlstd{=i)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-96-1} 
-
-\end{knitrout}
-            \end{figure}
-
-            Nos gráficos acima podemos ver que a primeira ordem de lags que gera resíduos que são ruído branco é a ordem 23, então realizamos o teste com essa ordem e apresentamos os gráficos dos resíduos e dos testes nos resíduos.
-            
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{adf} \hlkwb{<-} \hlkwd{ur.df}\hlstd{(}\hlkwd{na.omit}\hlstd{(data1}\hlopt{$}\hlstd{Diff),} \hlkwc{lags}\hlstd{=}\hlnum{23}\hlstd{)}
+\hlstd{adf} \hlkwb{<-} \hlkwd{ur.df}\hlstd{(}\hlkwd{na.omit}\hlstd{(data2}\hlopt{$}\hlstd{Diff),} \hlkwc{lags}\hlstd{=lag)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -1914,84 +1460,59 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \begin{alltt}
 \hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{))}
 \hlkwd{plot}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{,} \hlkwc{type}\hlstd{=}\hlstr{'l'}\hlstd{,} \hlkwc{main}\hlstd{=}\hlstr{'Residuals'}\hlstd{)}
-\hlkwd{plot}\hlstd{(results[,}\hlnum{23}\hlstd{],} \hlkwc{main}\hlstd{=}\hlstr{'Ljung-Box'}\hlstd{)}
-\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
-\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
+\hlkwd{plot}\hlstd{(}\hlkwd{all_box}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{main}\hlstd{=}\hlstr{'Ljung-Box'}\hlstd{)}
+\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
+\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(adf}\hlopt{@}\hlkwc{res}\hlstd{),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-98-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-79-1} 
 
 \end{knitrout}
             \end{figure}
 
             Tanto o gráfico dos resíduos quanto os gráficos das funções de autocorrelação e autocorrelação parcial indicam que os resíduos do teste se comportam como ruído branco. Os p-valores do teste de Ljung-Box não rejeitam a hipótese de independência dos resíduos.
-            Agora, apresentamos o sumário do teste.
+            
+            Agora, visualizamos as estatísticas do teste e os valores críticos        
             
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{summary}\hlstd{(adf)}
+\hlstd{adf}\hlopt{@}\hlkwc{teststat}
 \end{alltt}
 \begin{verbatim}
-## 
-## ############################################### 
-## # Augmented Dickey-Fuller Test Unit Root Test # 
-## ############################################### 
-## 
-## Test regression none 
-## 
-## 
-## Call:
-## lm(formula = z.diff ~ z.lag.1 - 1 + z.diff.lag)
-## 
-## Residuals:
-##      Min       1Q   Median       3Q      Max 
-## -0.22188 -0.05360 -0.00105  0.05312  0.43487 
-## 
-## Coefficients:
-##              Estimate Std. Error t value Pr(>|t|)    
-## z.lag.1      -1.42558    0.27895  -5.111 4.90e-07 ***
-## z.diff.lag1   0.17388    0.27409   0.634 0.526170    
-## z.diff.lag2  -0.02840    0.26795  -0.106 0.915656    
-## z.diff.lag3  -0.13271    0.26169  -0.507 0.612327    
-## z.diff.lag4  -0.07700    0.25629  -0.300 0.763987    
-## z.diff.lag5  -0.02814    0.25109  -0.112 0.910805    
-## z.diff.lag6   0.07834    0.24538   0.319 0.749681    
-## z.diff.lag7   0.18963    0.23904   0.793 0.428057    
-## z.diff.lag8   0.20060    0.23263   0.862 0.389015    
-## z.diff.lag9   0.27072    0.22598   1.198 0.231590    
-## z.diff.lag10  0.40889    0.21970   1.861 0.063433 .  
-## z.diff.lag11  0.49504    0.21314   2.323 0.020681 *  
-## z.diff.lag12  0.37274    0.20730   1.798 0.072884 .  
-## z.diff.lag13  0.35967    0.20260   1.775 0.076576 .  
-## z.diff.lag14  0.39096    0.19667   1.988 0.047473 *  
-## z.diff.lag15  0.34434    0.18902   1.822 0.069218 .  
-## z.diff.lag16  0.36352    0.17944   2.026 0.043414 *  
-## z.diff.lag17  0.35626    0.16889   2.109 0.035497 *  
-## z.diff.lag18  0.42467    0.15598   2.723 0.006748 ** 
-## z.diff.lag19  0.45444    0.13990   3.248 0.001254 ** 
-## z.diff.lag20  0.37292    0.12147   3.070 0.002280 ** 
-## z.diff.lag21  0.29879    0.09860   3.030 0.002593 ** 
-## z.diff.lag22  0.24201    0.07265   3.331 0.000941 ***
-## z.diff.lag23  0.25544    0.04474   5.709 2.16e-08 ***
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
-## 
-## Residual standard error: 0.08436 on 418 degrees of freedom
-## Multiple R-squared:  0.6836,	Adjusted R-squared:  0.6654 
-## F-statistic: 37.62 on 24 and 418 DF,  p-value: < 2.2e-16
-## 
-## 
-## Value of test-statistic is: -5.1105 
-## 
-## Critical values for test statistics: 
+##                tau1
+## statistic -3.491532
+\end{verbatim}
+\begin{alltt}
+\hlstd{adf}\hlopt{@}\hlkwc{cval}
+\end{alltt}
+\begin{verbatim}
 ##       1pct  5pct 10pct
 ## tau1 -2.58 -1.95 -1.62
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
 
-            O valor da estatística do teste é de -2,9787. Os valores críticos para o teste são de -2,58 (1\%), -1,95 (5\%) e -1,62 (10\%). Sendo assim, o valor do teste ultrapassou os valores críticos para todos os graus de significância. O teste então rejeita a hipótese nula de presença de raiz unitária. O resultado obtido é, então, que a série temporal original é integrada de ordem um - I(1).
+            O valor da estatística do teste é de 3,4915. Os valores críticos para o teste são de -2,58 (1\%), -1,95 (5\%) e -1,62 (10\%). Sendo assim, o valor do teste ultrapassou os valores críticos para todos os graus de significância. O teste então rejeita a hipótese nula de presença de raiz unitária. O resultado obtido é, então, que a série temporal original é integrada de ordem um - I(1).
+            
+            
+        \subsubsection{Diferença Sazonal}
+    
+            A função de autocorrelação indica que existem lags sazonais significativos, no entando, o decaimento é rápido, indicanco não existência de raiz unitária sazonal.Testamos a seguir a hipótese nula de não presença de raiz unitária sazonal com o teste de Canova e Hansen (\cite{ch}).
+          
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{ch} \hlkwb{=} \hlkwd{ch.test}\hlstd{(}\hlkwd{ts}\hlstd{(}\hlkwd{na.omit}\hlstd{(data2}\hlopt{$}\hlstd{Diff),} \hlkwc{frequency}\hlstd{=}\hlnum{12}\hlstd{),} \hlkwc{type}\hlstd{=}\hlstr{"dummy"}\hlstd{,} \hlkwc{sid}\hlstd{=}\hlkwd{c}\hlstd{(}\hlnum{1}\hlopt{:}\hlnum{12}\hlstd{))}
+\hlstd{ch}\hlopt{$}\hlstd{pvalues}
+\end{alltt}
+\begin{verbatim}
+## [1] 0.6117258
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+            O teste retornou um p-valor de 0.6117, o que significa que não podemos rejeitar a hipótese nula de não presença de raiz unitária sazonal.
 
 
     \subsection{Identificação das Possíveis Formas Funcionais}
@@ -2002,15 +1523,15 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(}\hlkwd{na.omit}\hlstd{(data2}\hlopt{$}\hlstd{Diff)),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
+\hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(}\hlkwd{na.omit}\hlstd{(data2}\hlopt{$}\hlstd{Diff)),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-100-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-82-1} 
 
 \end{knitrout}
         \end{figure}
         
-        A função de autocorrelação tem até o terceiro lag significativo, enquanto mostra um lag significativo no fator sazonal.
+        A função de autocorrelação tem até o terceiro lag significativo, enquanto mostra dois lags significativo no fator sazonal.
         
         \begin{figure}[H]
         \caption{FACP da Primeira Diferença}
@@ -2018,225 +1539,99 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(}\hlkwd{na.omit}\hlstd{(data2}\hlopt{$}\hlstd{Diff)),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
+\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(}\hlkwd{na.omit}\hlstd{(data2}\hlopt{$}\hlstd{Diff)),} \hlkwc{lag.max}\hlstd{=}\hlnum{60}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-101-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-83-1} 
 
 \end{knitrout}
         \end{figure}
 
-        A função de autocorrelação parcial tem até o terceiro lag significativo, enquanto mostra três lags significativos no fator sazonal.
+        A função de autocorrelação parcial tem até o terceiro lag significativo, enquanto mostra dois lags significativos no fator sazonal.
         
-        A análise das funções acima sugere que uma ordem máxima para o modelo SARIMA é (2,1,3)(1,0,2)12.
+        A análise das funções acima sugere que uma ordem máxima para o modelo SARIMA é (3,1,3)(2,0,2)12.
 
 
     \subsection{Estimação}
     
-        Na subseção anterior definimos as ordems máximas do modelo SARIMA. Nesta seção vamos estimar todos os modelos até as ordens máximas, testar seus resíduos para checar se comportam-se como ruído branco e, finalmente, escolher o modelo que passa o teste dos resíduos que apresente melhor critério de informação.
-        
-        Primeiramente, estimamaos todos os modelos até as ordens máximas (72 modelos) e realizamos os testes de Ljung-Box.
-        
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{ps} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{)}
-\hlstd{qs} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{)}
-\hlstd{Ps} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{)}
-\hlstd{Qs} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{0}\hlstd{)}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
+        Na subseção anterior definimos as ordems máximas do modelo SARIMA. Nesta seção vamos estimar todos os modelos até as ordens máximas, testar seus resíduos para checar se comportam-se como ruído branco e, finalmente, escolher os modelos que passam o teste dos resíduos que apresentam melhores critérios de informação (AIC e BIC). Esses passos são realizados no \textit{chunk} abaixo.
+
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{results} \hlkwb{<-} \hlkwd{matrix}\hlstd{(}\hlkwc{ncol}\hlstd{=}\hlnum{96}\hlstd{,}\hlkwc{nrow}\hlstd{=}\hlnum{25}\hlstd{)}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{96}\hlstd{)\{}
-    \hlstd{model} \hlkwb{<-} \hlkwd{sarima}\hlstd{(data2}\hlopt{$}\hlstd{Value,}
-                    \hlstd{ps[i],} \hlnum{1}\hlstd{, qs[i],}
-                    \hlstd{Ps[i],} \hlnum{0}\hlstd{, Qs[i],} \hlnum{12}\hlstd{)}
-    \hlkwa{for} \hlstd{(e} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{25}\hlstd{)\{}
-      \hlstd{box} \hlkwb{<-} \hlkwd{Box.test}\hlstd{(model}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals,}\hlkwc{lag}\hlstd{=e)}
-      \hlstd{results[e,i]} \hlkwb{<-} \hlstd{box}\hlopt{$}\hlstd{p.value}
-    \hlstd{\}}
-\hlstd{\}}
+\hlstd{order} \hlkwb{<-} \hlkwd{select_model}\hlstd{(data2}\hlopt{$}\hlstd{Value,}\hlnum{3}\hlstd{,}\hlnum{1}\hlstd{,}\hlnum{3}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{12}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
 
-        Em segundo lugar, escolhemos os modelos que passam no teste de Ljung-Box.
+        Abaixo, as ordens dos melhores modelos pelos critérios AIC e BIC.
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{models} \hlkwb{<-} \hlkwd{c}\hlstd{()}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{96}\hlstd{)\{}
-    \hlkwa{if} \hlstd{(}\hlkwd{min}\hlstd{(results[,i])} \hlopt{>} \hlnum{.05}\hlstd{)\{}
-      \hlstd{models} \hlkwb{<-} \hlkwd{append}\hlstd{(models, i)}
-    \hlstd{\}}
-\hlstd{\}}
-\hlstd{models}
+\hlcom{# Ordem pelo critério AIC}
+\hlkwd{print}\hlstd{(}\hlstr{"p q P Q"}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
-##  [1]  1  2  5 13 14 17 25 26 29 37 38 41 49 50 53
-\end{verbatim}
-\end{kframe}
-\end{knitrout}
-            
-            
-        Como podemos ver, apenas seis modelos apresentam resíduos com comportamento de ruído branco. Os estimamos novamente para avaliar o critério de informação.
-            
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{aics} \hlkwb{<-} \hlkwd{c}\hlstd{()}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlstd{models)\{}
-    \hlstd{model} \hlkwb{<-} \hlkwd{sarima}\hlstd{(data2}\hlopt{$}\hlstd{Value,}
-                    \hlstd{ps[i],} \hlnum{1}\hlstd{, qs[i],}
-                    \hlstd{Ps[i],} \hlnum{0}\hlstd{, Qs[i],} \hlnum{12}\hlstd{)}
-    \hlstd{aics} \hlkwb{<-} \hlkwd{append}\hlstd{(aics, model}\hlopt{$}\hlstd{AIC)}
-\hlstd{\}}
-\end{alltt}
-\end{kframe}
-\end{knitrout}
-
-        Abaixo, os critérios de informação de cada modelo.
-
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{models}
-\end{alltt}
-\begin{verbatim}
-##  [1]  1  2  5 13 14 17 25 26 29 37 38 41 49 50 53
+## [1] "p q P Q"
 \end{verbatim}
 \begin{alltt}
-\hlstd{aics}
+\hlstd{order[,}\hlnum{1}\hlstd{]}
 \end{alltt}
 \begin{verbatim}
-##  [1] -1.600023 -1.603858 -1.602997 -1.589686 -1.593681 -1.593786 -1.589401
-##  [8] -1.593450 -1.593655 -1.593969 -1.598147 -1.599064 -1.580736 -1.584343
-## [15] -1.584862
+## [1] 3 1 0 2
+\end{verbatim}
+\begin{alltt}
+\hlcom{# Ordem pelo critério BIC}
+\hlkwd{print}\hlstd{(}\hlstr{"p q P Q"}\hlstd{)}
+\end{alltt}
+\begin{verbatim}
+## [1] "p q P Q"
+\end{verbatim}
+\begin{alltt}
+\hlstd{order[,}\hlnum{2}\hlstd{]}
+\end{alltt}
+\begin{verbatim}
+## [1] 1 2 0 2
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
 
-        Escolhemos, então, o modelo com menor critério de informação.
-
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlstd{ind} \hlkwb{<-} \hlkwd{which.min}\hlstd{(aics)}
-\hlstd{mod} \hlkwb{<-} \hlstd{models[ind]}
-\hlstd{ps[mod]}
-\end{alltt}
-\begin{verbatim}
-## [1] 1
-\end{verbatim}
-\begin{alltt}
-\hlstd{qs[mod]}
-\end{alltt}
-\begin{verbatim}
-## [1] 3
-\end{verbatim}
-\begin{alltt}
-\hlstd{Ps[mod]}
-\end{alltt}
-\begin{verbatim}
-## [1] 1
-\end{verbatim}
-\begin{alltt}
-\hlstd{Qs[mod]}
-\end{alltt}
-\begin{verbatim}
-## [1] 3
-\end{verbatim}
-\end{kframe}
-\end{knitrout}
-
-        O modelo com melhor critério de informação é o segundo, que corresponde ao 4 na lista dos 72 modelos, que é o SARIMA (1,1,2)(0,0,2)12. Estimamos então novamente esse modelo.
+        O modelo com melhor critério AIC é o SARIMA (3,1,1)(0,0,2)12. O modelo com melhor critério BIC é o SARIMA (1,1,2)(0,0,2)12. Pelo critério da parcimônia selecionamos o modelo com melhor critério BIC, pois é o que apresenta menor quantidade de parâmetros.
             
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{model2} \hlkwb{<-} \hlkwd{sarima}\hlstd{(data2}\hlopt{$}\hlstd{Value,}
-                \hlnum{1}\hlstd{,} \hlnum{1}\hlstd{,} \hlnum{3}\hlstd{,}
-                \hlnum{1}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{3}\hlstd{,} \hlnum{12}\hlstd{)}
+                \hlnum{1}\hlstd{,} \hlnum{1}\hlstd{,} \hlnum{2}\hlstd{,}
+                \hlnum{0}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{2}\hlstd{,} \hlnum{12}\hlstd{)}
 \end{alltt}
-\end{kframe}
-\end{knitrout}
-
-        Abaixo, o sumário do modelo.
-        
-\begin{knitrout}
-\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
-\begin{alltt}
-\hlkwd{print}\hlstd{(model2)}
-\end{alltt}
-\begin{verbatim}
-## $fit
-## 
-## Call:
-## stats::arima(x = xdata, order = c(p, d, q), seasonal = list(order = c(P, D, 
-##     Q), period = S), xreg = constant, transform.pars = trans, fixed = fixed, 
-##     optim.control = list(trace = trc, REPORT = 1, reltol = tol))
-## 
-## Coefficients:
-##          ar1      ma1     ma2     ma3    sar1     sma1    sma2    sma3
-##       0.9703  -1.1658  0.1775  0.0990  0.8984  -1.2372  0.0270  0.2941
-## s.e.  0.0184   0.0625  0.0983  0.0643  0.0785   0.0945  0.0945  0.0653
-##       constant
-##         0.0040
-## s.e.    0.0146
-## 
-## sigma^2 estimated as 0.01084:  log likelihood = 268.22,  aic = -516.44
-## 
-## $degrees_of_freedom
-## [1] 313
-## 
-## $ttable
-##          Estimate     SE  t.value p.value
-## ar1        0.9703 0.0184  52.8741  0.0000
-## ma1       -1.1658 0.0625 -18.6441  0.0000
-## ma2        0.1775 0.0983   1.8049  0.0721
-## ma3        0.0990 0.0643   1.5397  0.1247
-## sar1       0.8984 0.0785  11.4417  0.0000
-## sma1      -1.2372 0.0945 -13.0876  0.0000
-## sma2       0.0270 0.0945   0.2861  0.7750
-## sma3       0.2941 0.0653   4.5076  0.0000
-## constant   0.0040 0.0146   0.2724  0.7855
-## 
-## $AIC
-## [1] -1.603858
-## 
-## $AICc
-## [1] -1.602066
-## 
-## $BIC
-## [1] -1.486636
-\end{verbatim}
 \end{kframe}
 \end{knitrout}
 
 
     \subsection{Diagnóstico dos Resíduos}
+    
+        Nesta seção iremos fazer o diagnóstico dos resíduos. Para isso vamos analisar sua independência e homoscedasticidade.
 
-        \begin{figure}[H]
-        \caption{Resíduos}
-        \centering
+        \subsubsection{Independência}
+        
+            Para analisar a independência dos resíduos analisamos o gráfico dos resíduos, a função de autocorrelação e a função de autocorrelação parcial.
+        
+            \begin{figure}[H]
+            \caption{Resíduos}
+            \centering
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{plot}\hlstd{(model2}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-107-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-85-1} 
 
 \end{knitrout}
-        \end{figure}
-        
-        \subsubsection{Independência}
+            \end{figure}
             
             \begin{figure}[H]
             \caption{FAC dos Resíduos}
@@ -2247,21 +1642,31 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(model2}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-108-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-86-1} 
 
 \end{knitrout}
             \end{figure}
             
-            Tanto o gráfico dos resíduos quanto a sua função de autocorrelação indicam que os resíduos se comportam como ruído branco. Para testar essa hipótese, realizamos o teste de Ljung-Box para todos os lags até o vinte e cinco. Os testes são realizados no \textit{chunk} abaixo, e na figura abaixo estão os p-valores dos testes para cada lag.
+            \begin{figure}[H]
+            \caption{FACP dos Resíduos}
+            \centering          
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(model2}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals),} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
+\end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-87-1} 
+
+\end{knitrout}
+            \end{figure}
+            
+            Tanto o gráfico dos resíduos quanto a sua função de autocorrelação e sua função de autocorrelação parcial indicam que os resíduos se comportam como ruído branco, já que a quantidade de lags significativos é a esperada para um nível de significância de 5\%. o Para testar essa hipótese, realizamos o teste de Ljung-Box para todos os lags até o vinte e cinco. Os testes são realizados no \textit{chunk} abaixo, e na figura abaixo estão os p-valores dos testes para cada lag.
             
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{boxs} \hlkwb{<-} \hlkwd{matrix}\hlstd{(}\hlkwc{nrow}\hlstd{=}\hlnum{25}\hlstd{,}\hlkwc{ncol}\hlstd{=}\hlnum{1}\hlstd{)}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{25}\hlstd{)\{}
-    \hlstd{box} \hlkwb{<-} \hlkwd{Box.test}\hlstd{(model2}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals,}\hlkwc{lag}\hlstd{=i)}
-    \hlstd{boxs[i]} \hlkwb{<-} \hlstd{box}\hlopt{$}\hlstd{p.value}
-\hlstd{\}}
+\hlstd{boxs} \hlkwb{<-} \hlkwd{all_box}\hlstd{(model2}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -2275,16 +1680,29 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{plot}\hlstd{(boxs,} \hlkwc{type}\hlstd{=}\hlstr{'l'}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-110-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-89-1} 
 
 \end{knitrout}
             \end{figure}
             
-            Os p-valores não rejeitam a hipótese nula de independência da distribuição.
+            Abaixo, o valor mínimo do teste de Ljung-Box entre todos os lags considerados.
+            
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{min}\hlstd{(boxs)}
+\end{alltt}
+\begin{verbatim}
+## [1] 0.1309436
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+            
+            Os p-valores não rejeitam a hipótese nula de independência da distribuição, uma vez que todos são superiores a 0,05.
             
         \subsubsection{Homoscedasticidade}
         
-            Testamos a homoscedasticidade dos resíduos apicando a análise acima no resíduo ao quadrado.
+            Testamos a homoscedasticidade dos resíduos do modelo selecionado apicando a análise acima nos resíduos ao quadrado.
             
             \begin{figure}[H]
             \caption{Resíduos ao Quadrado}
@@ -2295,7 +1713,7 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{plot}\hlstd{(model2}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals}\hlopt{^}\hlnum{2}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-111-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-91-1} 
 
 \end{knitrout}
             \end{figure}
@@ -2309,7 +1727,7 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{acf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(model2}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals)}\hlopt{^}\hlnum{2}\hlstd{,} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-112-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-92-1} 
 
 \end{knitrout}
             \end{figure}
@@ -2323,21 +1741,17 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{pacf}\hlstd{(}\hlkwd{as.matrix}\hlstd{(model2}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals)}\hlopt{^}\hlnum{2}\hlstd{,} \hlkwc{lag.max}\hlstd{=}\hlnum{40}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-113-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-93-1} 
 
 \end{knitrout}
             \end{figure}
             
-            Tanto o gráfico dos resíduos ao quadrado quanto a sua função de autocorrelação e sua função de autocorrelação parcial indicam homoscedasticidade. Para testar essa hipótese, realizamos o teste de Ljung-Box nos rsíduos ao quadrado para todos os lags até o vinte e cinco. Os testes são realizados no \textit{chunk} abaixo, e na figura abaixo estão os p-valores dos testes para cada lag.
+            Tanto o gráfico dos resíduos ao quadrado quanto a sua função de autocorrelação e sua função de autocorrelação parcial indicam homoscedasticidade. Para testar essa hipótese, realizamos o teste de Ljung-Box nos resíduos ao quadrado para todos os lags até o vinte e cinco. Os testes são realizados no \textit{chunk} abaixo, e na figura abaixo estão os p-valores dos testes para cada lag.
             
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{boxs} \hlkwb{<-} \hlkwd{matrix}\hlstd{(}\hlkwc{nrow}\hlstd{=}\hlnum{25}\hlstd{,}\hlkwc{ncol}\hlstd{=}\hlnum{1}\hlstd{)}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{1}\hlopt{:}\hlnum{25}\hlstd{)\{}
-    \hlstd{box} \hlkwb{<-} \hlkwd{Box.test}\hlstd{(model2}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals}\hlopt{^}\hlnum{2}\hlstd{,}\hlkwc{lag}\hlstd{=i)}
-    \hlstd{boxs[i]} \hlkwb{<-} \hlstd{box}\hlopt{$}\hlstd{p.value}
-\hlstd{\}}
+\hlstd{boxs} \hlkwb{<-} \hlkwd{all_box}\hlstd{(model2}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals}\hlopt{^}\hlnum{2}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -2351,33 +1765,25 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{plot}\hlstd{(boxs,} \hlkwc{type}\hlstd{=}\hlstr{'l'}\hlstd{)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-115-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-95-1} 
 
 \end{knitrout}
             \end{figure}
             
-            Os p-valores não rejeitam a hipótese nula de independência da distribuição. Os resíduos podem ser considerados então homoscedásticos, pois os resíduos ao quadrado são `bem comportados' (ruído branco). Não é necessário então estimar um modelo de variância condicional.
-            
-        \subsubsection{Normalidade}
-        
-            Para testar a normalidade dos resíduos aplicamos o teste de Shapiro-Wilk (\cite{shapirowilk}).
+        Abaixo, o valor mínimo do teste de Ljung-Box entre todos os lags considerados.
             
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{shapiro.test}\hlstd{(model2}\hlopt{$}\hlstd{fit}\hlopt{$}\hlstd{residuals)}
+\hlkwd{min}\hlstd{(boxs)}
 \end{alltt}
 \begin{verbatim}
-## 
-## 	Shapiro-Wilk normality test
-## 
-## data:  model2$fit$residuals
-## W = 0.99433, p-value = 0.2742
+## [1] 0.08952865
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
-
-            O teste não rejeita a hipótese nula de normalidade dos resíduos.
+            
+            Os p-valores não rejeitam a hipótese nula de independência da distribuição. Os resíduos podem ser considerados então homoscedásticos, pois os resíduos ao quadrado são `bem comportados' (ruído branco). Não é necessário então estimar um modelo de variância condicional.
 
 
     \subsection{Previsão e Acurácia}
@@ -2386,20 +1792,12 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
     
         \subsubsection{Previsão}
         
-            Agora, realizaremos previsões para os últimos 20 períodos da amostra. Faremos previsão recursiva, ou seja: prevemos sempre apenas o período imediatamente subsequente, utilizando todos os dados até então.
+            Agora, realizaremos previsões para os últimos 10 períodos da amostra. Faremos previsão recursiva, ou seja: prevemos sempre apenas o período imediatamente subsequente, utilizando todos os dados até então.
         
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{fs} \hlkwb{<-} \hlkwd{c}\hlstd{()}
-\hlkwa{for} \hlstd{(i} \hlkwa{in} \hlnum{20}\hlopt{:}\hlnum{1}\hlstd{)\{}
-    \hlstd{until}      \hlkwb{<-} \hlkwd{length}\hlstd{(data2}\hlopt{$}\hlstd{Value)}\hlopt{-}\hlstd{i}
-    \hlstd{data}       \hlkwb{<-} \hlstd{data2}\hlopt{$}\hlstd{Value[}\hlnum{1}\hlopt{:}\hlstd{until]}
-    \hlstd{prediction} \hlkwb{<-} \hlkwd{sarima.for}\hlstd{(data,} \hlnum{1}\hlstd{,}
-                           \hlnum{1}\hlstd{,} \hlnum{1}\hlstd{,} \hlnum{3}\hlstd{,}
-                           \hlnum{1}\hlstd{,} \hlnum{0}\hlstd{,} \hlnum{3}\hlstd{,} \hlnum{12}\hlstd{)}
-    \hlstd{fs} \hlkwb{<-} \hlkwd{append}\hlstd{(fs, prediction}\hlopt{$}\hlstd{pred)}
-\hlstd{\}}
+\hlstd{fs} \hlkwb{<-} \hlkwd{prediction}\hlstd{(data2}\hlopt{$}\hlstd{Value,}\hlnum{1}\hlstd{,}\hlnum{2}\hlstd{,}\hlnum{0}\hlstd{,}\hlnum{2}\hlstd{)}
 \end{alltt}
 \end{kframe}
 \end{knitrout}
@@ -2412,9 +1810,8 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlstd{fs}
 \end{alltt}
 \begin{verbatim}
-##  [1] 2.453337 2.494854 2.342738 2.434107 2.268806 2.257146 2.297302 2.383312
-##  [9] 2.306875 2.259689 2.247672 2.368786 2.348496 2.498029 2.576578 2.857734
-## [17] 2.771846 2.907254 3.019997 3.042637
+##  [1] 2.160667 1.939964 2.144997 2.180143 2.143683 1.977818 1.831369 2.059727
+##  [9] 1.846058 1.647538
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -2428,14 +1825,14 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlstd{length} \hlkwb{<-} \hlkwd{length}\hlstd{(data2}\hlopt{$}\hlstd{Value)}
-\hlstd{start}  \hlkwb{<-} \hlstd{length} \hlopt{-} \hlnum{19}
+\hlstd{start}  \hlkwb{<-} \hlstd{length} \hlopt{-} \hlnum{9}
 \hlstd{series} \hlkwb{<-} \hlstd{data2}\hlopt{$}\hlstd{Value[start}\hlopt{:}\hlstd{length]}
 \hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{2}\hlstd{,}\hlnum{1}\hlstd{))}
 \hlkwd{plot}\hlstd{(fs,}\hlkwc{type}\hlstd{=}\hlstr{'l'}\hlstd{,} \hlkwc{main}\hlstd{=}\hlstr{'Previsões'}\hlstd{)}
 \hlkwd{plot}\hlstd{(series)}
 \end{alltt}
 \end{kframe}
-\includegraphics[width=\maxwidth]{figure/unnamed-chunk-118-1} 
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-98-1} 
 
 \end{knitrout}
             \end{figure}
@@ -2450,8 +1847,8 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{accuracy}\hlstd{(fs,}\hlkwd{as.matrix}\hlstd{(series))}
 \end{alltt}
 \begin{verbatim}
-##                  ME      RMSE        MAE      MPE     MAPE
-## Test set 0.04314027 0.1129687 0.09046585 1.525351 3.533608
+##                 ME      RMSE       MAE      MPE     MAPE
+## Test set 0.7668036 0.8536119 0.7668036 26.84425 26.84425
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
@@ -2464,12 +1861,12 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \hlkwd{TheilU}\hlstd{(series,fs)}
 \end{alltt}
 \begin{verbatim}
-## [1] 0.04403311
+## [1] 0.3080207
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
             
-            O índice do teste foi de 0,04403311, menor que 1. O modelo fez previsões melhores que uma simples adivinhação.
+            O índice do teste foi de 0,308, menor que 1. O modelo fez previsões melhores que uma simples adivinhação.
             
             
             
@@ -2482,6 +1879,9 @@ Para o uso dos dados nas próximas seções é necessário transformar os dados 
 \section{Conclusão}
 
     Neste trabalho utilizamos as técnicas apresentadas na disciplina Estatística Econômica Aplicada para analisar uma série temporal. A série original possuía um outlier e uma quebra estrutural, então foram estimados modelos para duas séries temporais diferentes (duas partes da série temporal original). Ambas as séries temporais apresentaram sazonalidade, e não foram necessários modelos de variância condicional. As previsões dos modelos mostraram-se melhores que pura adivinhação, apontando para uma boa qualidade dos modelos.
+
+
+
 
 \printbibliography[heading=bibintoc]
 

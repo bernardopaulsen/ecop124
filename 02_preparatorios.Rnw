@@ -1,22 +1,23 @@
 \section{Preparatórios}
 
-    Primeriamente, precisamos importar as bibliotecas que serão necessárias para executar os códigos das próximas seções. Utilizamos as seguintes bibliotecas:
+    \subsection{Importação de Bibliotecas}
+
+        Primeriamente, precisamos importar as bibliotecas que serão necessárias para executar os códigos das próximas seções. Utilizamos as seguintes bibliotecas:
     
-    \begin{itemize}
-        \item \textit{astsa} (\cite{astsa}): função \textit{sarima}.
-        \item \textit(DescTools) (\cite{desctools}): função \textit{TheilU};
-        \item \textit{forecast} (\cite{forecast}): funções \textit{auto.arima} e \textit{forecast};
-        \item \textit{lubridate} (\cite{lubridate}): função \textit{parse\underline{ }date\underline{ }time};
-        \item \textit{notsTest} (\cite{nortstest}): função \textit{Lm.test};
-        \item \textit{quantmod} (\cite{quantmod}): função \textit{xts};
-        \item \textit{rugarch} (\cite{rugarch}): funções \textit{ugarchfit}, \textit{ugarchforecast} e \textit{ugarchspec};
-        \item \textit{stats} (\cite{stats}): funções \textit{acf} e \textit{Box.test};
-        \item \textit{strucchange} (\cite{strucchange}): funções \textit{efp} e \textit{sctest};
-        \item \textit{tseries} (\cite{tseries}): função \textit{pacf};
-        \item \textit{tsoutliers} (\cite{tsoutliers}): funções \textit{tso} e \textit{tsclean};
-        \item \textit{urca} (\cite{urca}): função \textit{ur.df};
-        \item \textit{uroot} (\cite{uroot}): função \textit{ch.test}.
-    \end{itemize}
+        \begin{itemize}
+            \item \textit{astsa} (\cite{astsa}): função \textit{sarima}.
+            \item \textit{DescTools} (\cite{desctools}): função \textit{TheilU};
+            \item \textit{forecast} (\cite{forecast}): função \textit{accuracy};
+            \item \textit{lubridate} (\cite{lubridate}): função \textit{parse\underline{ }date\underline{ }time};
+            \item \textit{notsTest} (\cite{nortstest}): função \textit{Lm.test};
+            \item \textit{quantmod} (\cite{quantmod}): função \textit{xts};
+            \item \textit{stats} (\cite{stats}): funções \textit{acf} e \textit{Box.test};
+            \item \textit{strucchange} (\cite{strucchange}): funções \textit{efp} e \textit{sctest};
+            \item \textit{tseries} (\cite{tseries}): função \textit{pacf};
+            \item \textit{tsoutliers} (\cite{tsoutliers}): funções \textit{tso} e \textit{tsclean};
+            \item \textit{urca} (\cite{urca}): função \textit{ur.df};
+            \item \textit{uroot} (\cite{uroot}): função \textit{ch.test}.
+        \end{itemize}
     
 <<libraries, message=FALSE>>=
 library('astsa')
@@ -25,7 +26,6 @@ library('forecast')
 library('lubridate')
 library('nortsTest')
 library('quantmod')
-library('rugarch')
 library('stats')
 library('strucchange')
 library('tseries')
@@ -34,7 +34,139 @@ library('urca')
 library('uroot')
 @
 
-    Antes de importar os dados é necessário selecionar como diretório de trabalho a pasta que contém o arquivo com os dados.
+    \subsection{Definição de Funções}
+    
+        Abaixo definimos as funções que serão utilizadas ao longo do trabalho.
+
+<<>>=
+all_box <- function(data){
+  # Retorna os p-valores de testes de Ljung-Box até o lag 25
+  boxs <- matrix(nrow=25,ncol=1)
+  for (i in 1:25){
+    box <- Box.test(data,lag=i)
+    boxs[i] <- box$p.value
+  }
+  return(boxs)
+}
+
+select_adf <- function(data, typ){
+  # Retorna o menor lag do teste ADF no qual os residuos se comportam como
+  #ruido branco.
+  results <- matrix(,nrow=25,ncol=24)
+  for (i in 1:24){
+    adf <- ur.df(data, type=typ, lags=i)
+    results[,i] <- all_box(adf@res)
+  }
+  oks <- c()
+  for (i in 1:24){
+    if (min(results[,i]) > .05){
+      oks <- append(oks, i)
+    }
+  }
+  return(oks[1])
+}
+
+all_orders <- function(max_p, max_q, max_P, max_Q){
+  # Retorna matriz com todas as ordens possiveis para o SARIMA dadas as ordens
+  #maximas.
+  ps = c()
+  qs = c()
+  Ps = c()
+  Qs = c()
+  for (p in 0:max_p){
+    for (q in 0:max_q){
+      for (P in 0:max_P){
+        for (Q in 0:max_Q){
+          ps <- append(ps,p)
+          qs <- append(qs,q)
+          Ps <- append(Ps,P)
+          Qs <- append(Qs,Q)
+        }
+      }
+    }
+  }
+  order_s <- matrix(c(ps,qs,Ps,Qs),ncol=4)
+  return(order_s)
+}
+
+estimate <- function(data,d,D,order,f){
+  # Estima um modelo SARIMA
+  res    <- matrix(nrow=27)
+  model  <- sarima(data,
+                  order[1], d, order[2],
+                  order[3], D, order[4], f)
+  res[1] <- model$AIC
+  res[2] <- model$BIC
+  for (e in 1:25){
+    box <- Box.test(model$fit$residuals,lag=e)
+    res[e+2] <- box$p.value
+  }
+  return(res)
+}
+
+select_model <- function(data,max_p,d,max_q,max_P,D,max_Q,freq){
+  # Seleciona o melhor modelo SARIMA seguindo a metodologia Box-Jenkins
+  all_order <- all_orders(max_p,max_q,max_P,max_Q)
+  len       <- length(all_order[,1])
+  results   <- matrix(ncol=len,nrow=27)
+  print('Modelos a estimar:')
+  print(len)
+  print('Estimando modelos, calculando AICs e fazendo testes de Ljung-Box...')
+  for (i in 1:len){
+    order <- all_order[i,]
+    res   <- tryCatch(estimate(data,1,0,order,12),
+                      error = function(e){
+                          return(matrix(c(1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0),nrow=27))
+                      })
+    results[,i] <- res
+  }
+  print('Selecionando os modelos que pelo teste de Ljung-Box...')
+  models <- c()
+  for (i in 1:len){
+    if (min(results[3:27,i]) > .05){
+      models <- append(models,i)
+    }
+  }
+  print('Modelos selecionados:')
+  print('p q P Q')
+  for (m in models){
+    print(all_order[m,])
+  }
+  print('Verificando menor AIC...')
+  aics <- results[1,models]
+  bics <- results[2,models]
+  inda <- which.min(aics)
+  indb <- which.min(bics)
+  moda <- models[inda]
+  modb <- models[indb]
+  print('Modelo selecionado por critério AIC:')
+  print('p q P Q')
+  print(all_order[moda,])
+  print('Modelo selecionado por critério BIC:')
+  print('p q P Q')
+  print(all_order[modb,])
+  both <- matrix(c(all_order[moda,],all_order[modb,]), nrow=4)
+  return(both)
+}
+
+prediction <- function(data, p, q, P, Q){
+  fs <- c()
+  for (i in 10:1){
+    start      <- 10 - i
+    until      <- length(data)-i
+    data       <- data1$Value[start:until]
+    prediction <- sarima.for(data, 1,
+                             p, 1, q,
+                             P, 0, Q, 12)
+    fs <- append(fs, prediction$pred)
+  }
+    return(fs)
+}
+@
+
+    \subsection{Definição do Diretório de Trabalho}
+
+        Antes de importar os dados é necessário selecionar como diretório de trabalho a pasta que contém o arquivo com os dados.
 
 <<setwd>>=
 setwd("~/Google Drive/Mestrado/Estat/Prova2/3")

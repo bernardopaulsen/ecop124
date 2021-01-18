@@ -67,6 +67,9 @@
 <<child='06_conclusao.Rnw'>>=
 @
 
+
+
+
 \printbibliography[heading=bibintoc]
 
 \end{document}
